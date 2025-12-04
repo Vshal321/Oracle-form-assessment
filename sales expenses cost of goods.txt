@@ -1,0 +1,72 @@
+select sales_account, expense_account from mtl_system_items_b;
+
+sales_account, expense_account;
+
+
+select COGSt from mtl_system_items_b;
+
+select * from qp_list_lines;
+
+select * from MTL_SYSTEM_ITEMS;
+
+select * from gl_code_combinations;
+
+select * from gl_code_combinations_kfv;
+
+select cost_of_sales_account from mtl_system_items_b;
+
+
+select 
+sales_account,expense_account 
+from 
+mtl_system_items_b 
+where 
+segment1='T166925'
+and organization_id = 14493;
+
+
+
+select 
+msib.segment1,
+msib.description,
+flv.meaning "411_Item_Type",
+msib.INVENTORY_ITEM_STATUS_CODE "411_Item_Status",
+gcc_cog.concatenated_segments COGS_Account,
+gcc_sal.concatenated_segments SALES_Account,
+gcc_exp.concatenated_segments Expense_Account
+from
+gl_code_combinations_kfv gcc_sal,
+gl_code_combinations_kfv gcc_cog,
+gl_code_combinations_kfv gcc_exp,
+mtl_system_items_b msib,
+fnd_lookup_values flv
+where 
+gcc_sal.code_combination_id = msib.sales_account 
+and gcc_exp.code_combination_id = msib.expense_account
+and gcc_cog.code_combination_id = msib.cost_of_sales_account
+and msib.item_type = flv.lookup_code
+and flv.lookup_type = 'ITEM_TYPE'
+and flv.language = 'US'
+and msib.organization_id = 14493
+and msib.segment1='TC002-011-030';
+
+select  from terex_411_items;
+310.3140.4101.0000.00000.90201.4120.000.0000
+
+310.3140.5101.0000.00000.90201.4120.000.0000
+
+310.3140.5904.0000.00000.69990.4001.000.0000
+
+
+select * from org_organization_definitions where organization_code = '411';
+
+select 
+concatenated_segments 
+from
+gl_code_combinations_kfv gcck,
+gl_code_combinations gcc
+where
+gcck.code_combination_id = gcc.code_combination_id;
+
+select * from fnd_lookup_values 
+where lookup_type like '%ITEM_TYPE%';

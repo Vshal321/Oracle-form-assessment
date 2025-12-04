@@ -1,0 +1,28 @@
+SELECT DISTINCT b.doc_developer_key Document_developer_key,
+b.doc_name document_name,
+a.qs_doc_details worksheet_name,
+c.obj_name folder_name,
+c.obj_developer_key folder_developer_key,
+d.ba_name Business_unit,
+fu.user_name created_by
+FROM EUL5_US.eul5_qpp_stats a,
+EUL5_US.eul5_documents b,
+EUL5_US.eul5_objs c,
+EUL5_US.eul5_bas d,
+EUL5_US.eul5_ba_obj_links f,
+fnd_user fu
+WHERE b.doc_name like '%Terex%Projects%Expenditure%'
+AND a.qs_doc_name = b.doc_name
+AND instr(a.qs_object_use_key,c.obj_id) <> 0
+AND c.obj_id = f.bol_obj_id
+AND d.ba_id = f.bol_ba_id
+----------AND TO_CHAR (fu.user_id) = SUBSTR (b.doc_updated_by, 2) -------------------commented
+AND TO_CHAR (fu.user_id) = SUBSTR (b.doc_created_by, 2)
+order by b.doc_developer_key;
+
+
+Org Id -8222 is for India 
+Hosur is in Bengalore
+
+cn8
+mx050

@@ -1,0 +1,36 @@
+--Query for  list of all Repair orders in 413 org  with repair type "Quality-Bulletin Related"Extract contains list of RO number, SO number, items and status
+
+
+
+SELECT DISTINCT DECODE(A.ORG_ID,14474,'Terex Australia Pty Ltd',A.ORG_ID) org,
+i.party_name,
+C.REPAIR_NUMBER "Repair Number",
+d.name,
+C.STATUS "Repair Order Status",
+A.ORDER_NUMBER "Sales Order Number",
+a.flow_status_code "Sales Order Status",
+E.SEGMENT1 "RO Item",
+f.inventory_item_id,
+g.segment1 "SO Item"
+FROM APPS.OE_ORDER_HEADERS_ALL A,
+apps.oe_order_lines_all f,
+APPS.CSD_PRODUCT_TRANSACTIONS B,
+apps.CSD_REPAIRS C,
+apps.CSD_REPAIR_TYPES_TL d,
+apps.mtl_system_items_b e,
+apps.mtl_system_items_b g,
+apps.hz_cust_accounts_all h,
+apps.hz_parties i
+WHERE B.ORDER_HEADER_ID = A.HEADER_ID
+AND B.REPAIR_LINE_ID =C.REPAIR_LINE_ID
+AND C.REPAIR_TYPE_ID =D.REPAIR_TYPE_ID
+AND E.INVENTORY_ITEM_id =c.INVENTORY_ITEM_id
+AND f.inventory_item_id = g.inventory_item_id
+AND UPPER(D.NAME) LIKE 'QUALITY%RELATED%'
+and a.sold_to_org_id = h.cust_Account_id
+and h.party_id = i.party_id
+AND a.header_id = f.header_id
+-- AND C.REPAIR_TYPE_ID=10005
+AND A.ORG_ID =14474
+--AND c.repair_number = 10351
+ORDER BY 2;

@@ -1,0 +1,37 @@
+SELECT
+distinct fcp.concurrent_program_id,
+fcpt.user_concurrent_program_name,
+fcp.concurrent_program_name,
+flv.meaning exe_method,
+fe.execution_file_name
+-- frg.request_group_name,
+-- frt.responsibility_name
+FROM
+apps.fnd_request_groups frg,
+apps.fnd_request_group_units frgu,
+apps.fnd_concurrent_programs fcp,
+apps.fnd_concurrent_programs_tl fcpt,
+apps.fnd_responsibility_tl frt,
+apps.fnd_responsibility frs,
+apps.fnd_executables fe,
+apps.fnd_lookup_values flv
+WHERE
+frgu.unit_application_id = fcp.application_id
+AND frgu.request_unit_id = fcp.concurrent_program_id
+AND frg.request_group_id = frgu.request_group_id
+AND frg.application_id = frgu.application_id
+AND fcpt.source_lang = userenv('LANG')
+AND fcp.application_id = fcpt.application_id
+AND fcp.concurrent_program_id = fcpt.concurrent_program_id
+AND frs.application_id = frt.application_id
+AND frs.responsibility_id = frt.responsibility_id
+AND frt.source_lang = userenv('LANG')
+AND frs.request_group_id = frg.request_group_id
+AND frs.application_id = frg.application_id
+AND upper(fcpt.user_concurrent_program_name) LIKE upper('Terex%purchase%order%')
+AND fcp.executable_id = fe.executable_id
+AND fe.execution_method_code = flv.lookup_code
+AND flv.lookup_type = 'CP_EXECUTION_METHOD_CODE'
+ORDER BY
+-- responsibility_name,
+user_concurrent_program_name;

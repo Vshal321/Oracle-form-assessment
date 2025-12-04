@@ -1,0 +1,112 @@
+--Query for SQL Script for Scheduled Requests Under Non TEREX.OPS% Users
+
+SELECT fcr.request_id, 
+        DECODE(fcr.status_code, 
+'A','Waiting', 'B','Resuming', 'C','Normal', 'D','Cancelled', 'E','Error', 'F','Scheduled', 'G','Warning', 'H','On Hold', 
+'I','Normal', 'M','No Manager', 'Q','Standby', 'R','Normal', 'S','Suspended', 'T','Terminating', 'U','Disabled', 'W','Paused', 
+'X','Terminated', 'Z','Waiting') Status, 
+DECODE(fcr.PHASE_CODE, 'C','Completed', 'I','Inactive', 'P','Pending', 'R','Running', 'Others' ) PHASE, 
+       CASE 
+       WHEN fcp.user_concurrent_program_name = 'Report Set' 
+       THEN 
+         (SELECT frs.user_request_set_name 
+          FROM fnd_request_sets_tl frs 
+          WHERE frs.application_id = fcr.argument1 
+          AND frs.request_set_id = fcr.argument2 
+          AND language = USERENV ('LANG')) 
+       WHEN SUBSTR(fcp.user_concurrent_program_name,1,11) = 'Request Set' 
+       THEN 
+         SUBSTR(fcp.user_concurrent_program_name,13,1000) 
+       ELSE 
+        fcp.user_concurrent_program_name 
+       END  user_concurrent_program_name, 
+                   CASE 
+       WHEN (fcp.user_concurrent_program_name = 'Report Set' OR SUBSTR(fcp.user_concurrent_program_name,1,11) = 'Request Set') 
+       THEN 
+         'Yes' 
+       ELSE 
+                     'No' 
+       END Request_Set, 
+                   fu.user_name, 
+                   fr.responsibility_name, 
+       CASE WHEN fcrc.class_type = 'P' 
+       THEN 'Repeat every ' 
+            || SUBSTR(fcrc.class_info, 1, instr(fcrc.class_info, ':') - 1) 
+            || DECODE(SUBSTR(fcrc.class_info, instr(fcrc.class_info, ':', 1, 1) + 1, 1), 'N', ' minutes', 'M', ' months', 'H', ' hours', 'D', ' days') 
+            || DECODE(SUBSTR(fcrc.class_info, instr(fcrc.class_info, ':', 1, 2) + 1, 1), 'S', ' from the start of the prior run', 'C', ' from the completion of the prior run') 
+       ELSE 'N/A' 
+       END periodic_schedule, 
+                   CASE WHEN fcrc.class_type = 'S' 
+       THEN NVL2 (dates.dates, 
+                   'Dates of Every Month: ' || dates.dates || '. ',NULL) 
+                                 || DECODE (SUBSTR (fcrc.class_info, 32, 1), 
+                                           '1', 'Last Day of Month') 
+                                 || DECODE (SIGN (TO_NUMBER (SUBSTR (fcrc.class_info, 33))), 
+                                            '1',    'Days of Every Week: ' 
+                                 || DECODE (SUBSTR (fcrc.class_info, 33, 1), 
+                                            '1', 'Su ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 34, 1), 
+                                            '1', 'Mo ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 35, 1), 
+                                            '1', 'Tu ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 36, 1), 
+                                            '1', 'We ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 37, 1), 
+                                            '1', 'Th ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 38, 1), 
+                                            '1', 'Fr ') 
+                                 || DECODE (SUBSTR (fcrc.class_info, 39, 1), 
+                                            '1', 'Sa ')) 
+                   ELSE 'N/A' 
+                   END specificday_schedule, 
+                   fcr.request_date, 
+                   TO_CHAR(fcr.requested_start_date, 'DD-MON-YYYY HH24:MI:SS') requested_start , 
+                   TO_CHAR((fcr.requested_start_date), 'HH24:MI:SS') start_time,  
+                   fcr.argument_text                  
+    FROM fnd_concurrent_requests fcr, 
+         fnd_conc_release_classes fcrc, 
+                     fnd_concurrent_programs_tl fcp, 
+         fnd_user fu, 
+                     fnd_responsibility_tl fr, 
+                     ( SELECT release_class_id, 
+                  SUBSTR (MAX (SYS_CONNECT_BY_PATH (s, ' ')), 2) dates 
+           FROM ( SELECT release_class_id, 
+                   RANK () 
+                   OVER (PARTITION BY release_class_id 
+                   ORDER BY s) 
+                       a, 
+                     s 
+                  FROM (SELECT c.class_info, 
+                                         l, 
+                                         c.release_class_id, 
+                                         DECODE (SUBSTR (c.class_info, l, 1), 
+                                                 '1', TO_CHAR (l)) 
+                                            s 
+                        FROM ( SELECT LEVEL l 
+                               FROM DUAL 
+                               CONNECT BY LEVEL <= 31), 
+                               fnd_conc_release_classes c 
+                               WHERE c.class_type = 'S') 
+                        WHERE s IS NOT NULL) 
+                  CONNECT BY PRIOR (a || release_class_id) = 
+                            (a - 1) || release_class_id 
+                  START WITH a = 1 
+                  GROUP BY release_class_id) dates 
+    WHERE 1=1
+
+      AND fcrc.application_id = fcr.release_class_app_id 
+      AND fcrc.release_class_id = fcr.release_class_id 
+      AND dates.release_class_id(+) = fcr.release_class_id 
+      AND NVL(fcrc.date2, SYSDATE + 1) > SYSDATE 
+      AND fcrc.class_type IS NOT NULL 
+      AND fcp.concurrent_program_id = fcr.concurrent_program_id 
+      AND fcp.application_id = fcr.program_application_id 
+      AND fcp.language = USERENV ('LANG') 
+      AND fu.user_id = fcr.requested_by 
+      AND fcr.responsibility_id = fr.responsibility_id 
+      AND fr.language = USERENV ('LANG') 
+      AND fu.user_name NOT LIKE 'TEREX.OPS%' 
+      
+
+      AND fcr.phase_code in ('P') 
+      order by USER_NAME;

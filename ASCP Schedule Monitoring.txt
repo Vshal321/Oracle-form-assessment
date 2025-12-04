@@ -1,0 +1,205 @@
+select
+request_id,
+parent_request_id,
+program_details,
+requested_start_date,
+actual_start_date,
+actual_complete_date,
+duration,
+user_name,
+argument_text,
+program_name,
+status
+--program_name,
+--requested_start_date,
+--argument_text
+from
+(
+select
+*
+from
+(
+(
+select
+decode(fcr.status_code,'I',0,1) as "sort1",
+nvl(fcr.actual_start_date,fcr.requested_start_date) as "sort2",
+--requested_start_date as "sort2",
+fcr.request_id,
+fcr.parent_request_id,
+fcp_tl.user_concurrent_program_name ||
+decode
+(
+fcr.description,
+null,'',
+' (' || fcr.description || ')'
+) ||
+decode
+(
+fcp_tl.user_concurrent_program_name,
+'Refresh Collection Snapshots', ' (' || fcr.argument2 || ')'
+) ||
+decode
+(
+fcr.hold_flag,
+'Y',' [On Hold]',
+decode
+(
+fcr.status_code,
+'E',' [Error]',
+'G',' [Warning]',
+'R',' [Running]',
+'D',' [Cancelled]',
+'W',' [Waiting]',
+'I',' [Scheduled]',
+'Q',' [Scheduled]',
+'C',' [Completed]'
+)
+) program_details,
+to_char(fcr.requested_start_date, 'DD-MON-YY HH24:MI') requested_start_date,
+to_char(fcr.actual_start_date, 'DD-MON-YY HH24:MI') actual_start_date,
+to_char(fcr.actual_completion_date, 'DD-MON-YY HH24:MI') actual_complete_date,
+round((nvl(fcr.actual_completion_date,sysdate) - fcr.actual_start_date)*1440) duration,
+fu.user_name,
+fcr.argument_text,
+fcp_tl.user_concurrent_program_name ||
+decode
+(
+fcr.description,
+null,'',
+' (' || fcr.description || ')'
+) program_name,
+decode
+(
+fcr.hold_flag,
+'Y','On Hold',
+decode
+(
+fcr.status_code,
+'E','Error',
+'G','Warning',
+'R','Running',
+'D','Cancelled',
+'W','Waiting',
+'I','Scheduled',
+'Q','Scheduled',
+'C','Completed'
+)
+) status
+from
+apps.fnd_concurrent_requests fcr,
+apps.fnd_concurrent_programs_tl fcp_tl,
+apps.fnd_user fu
+where
+fcp_tl.concurrent_program_id = fcr.concurrent_program_id
+and fcp_tl.language = 'US'
+and (
+fcp_tl.user_concurrent_program_name = 'Refresh Collection Snapshots' or
+fcp_tl.user_concurrent_program_name = 'Terex Purge Desginator'
+)
+and fu.user_id = fcr.requested_by
+and trunc(fcr.requested_start_date) >= trunc(sysdate - 30)
+)
+union
+(
+select
+decode(fcr.status_code,'I',0,1) as "sort1",
+nvl(fcr.actual_start_date,fcr.requested_start_date) as "sort2",
+--requested_start_date as "sort2",
+fcr.request_id,
+fcr.parent_request_id,
+fcp_tl.user_concurrent_program_name ||
+decode
+(
+fcr.description,
+null,'',
+' (' || fcr.description || ')'
+) ||
+decode
+(
+fcp_tl.user_concurrent_program_name,
+'Launch Supply Chain Planning Process', ' (' || fcr.argument1 || ':' || fcr.argument2 || ')',
+'Memory Based Snapshot 64 bit Linux', ' (' || fcr.argument1 || ')',
+'Memory Based Planner 64-bit Linux', ' (' || substr(fcr.argument1,instr(fcr.argument1,'=')+1,100) || ')',
+'Continuous Collections', ' (' || fcr.argument2 || ')',
+'Terex Daily Planner Shortage Load', ' (' || fcr.argument3 || ',' || fcr.argument4 || ')',
+'Terex Push Plan Information', ' (' || fcr.argument3 || ')'
+) ||
+decode
+(
+fcr.hold_flag,
+'Y',' [On Hold]',
+decode
+(
+fcr.status_code,
+'E',' [Error]',
+'G',' [Warning]',
+'R',' [Running]',
+'D',' [Cancelled]',
+'W',' [Waiting]',
+'I',' [Scheduled]',
+'Q',' [Scheduled]',
+'C',' [Completed]'
+)
+) program_details,
+to_char(fcr.requested_start_date, 'DD-MON-YY HH24:MI') requested_start_date,
+to_char(fcr.actual_start_date, 'DD-MON-YY HH24:MI') actual_start_date,
+to_char(fcr.actual_completion_date, 'DD-MON-YY HH24:MI') actual_complete_date,
+round((nvl(fcr.actual_completion_date,sysdate) - fcr.actual_start_date)*1440) duration,
+fu.user_name,
+fcr.argument_text,
+fcp_tl.user_concurrent_program_name ||
+decode
+(
+fcr.description,
+null,'',
+' (' || fcr.description || ')'
+) program_name,
+decode
+(
+fcr.hold_flag,
+'Y','On Hold',
+decode
+(
+fcr.status_code,
+'E','Error',
+'G','Warning',
+'R','Running',
+'D','Cancelled',
+'W','Waiting',
+'I','Scheduled',
+'Q','Scheduled',
+'C','Completed'
+)
+) status
+from
+apps.fnd_concurrent_requests@ro_apsprod.terex.com fcr,
+apps.fnd_concurrent_programs_tl@ro_apsprod.terex.com fcp_tl,
+apps.fnd_user@ro_apsprod.terex.com fu
+where
+fcp_tl.concurrent_program_id = fcr.concurrent_program_id
+and fcp_tl.language = 'US'
+and (
+fcp_tl.user_concurrent_program_name = 'Request Set Planning Data Collection' or
+fcp_tl.user_concurrent_program_name = 'Planning Data Pull' or
+fcp_tl.user_concurrent_program_name = 'Planning Data Pull Worker' or
+fcp_tl.user_concurrent_program_name = 'Planning ODS Load' or
+fcp_tl.user_concurrent_program_name = 'Planning ODS Load Worker' or
+fcp_tl.user_concurrent_program_name = 'Launch Supply Chain Planning Process' or
+fcp_tl.user_concurrent_program_name = 'Memory Based Snapshot 64 bit Linux' or
+fcp_tl.user_concurrent_program_name = 'Memory Based Planner 64-bit Linux' or
+fcp_tl.user_concurrent_program_name = 'Continuous Collections' or
+fcp_tl.user_concurrent_program_name = 'Terex Daily Planner Shortage Load' or
+fcp_tl.user_concurrent_program_name = 'Terex DE Load Planning Data' or
+fcp_tl.user_concurrent_program_name = 'Terex Push Plan Information' or
+fcp_tl.user_concurrent_program_name = 'TEREX Purchasing Demand Projection Load' or
+fcp_tl.user_concurrent_program_name = 'Terex Planned Orders Tied to Sales Order' or
+fcp_tl.user_concurrent_program_name = 'Planning Data Collection - Purge Staging Tables'
+)
+and fu.user_id = fcr.requested_by
+and trunc(fcr.requested_start_date) >= trunc(sysdate - 30)
+)
+)
+order by
+1 asc,
+2 desc
+);

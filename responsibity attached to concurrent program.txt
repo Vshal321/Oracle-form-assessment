@@ -1,0 +1,19 @@
+// Query to find responsibity attached to concurrent program.
+SELECT responsibility_name ,
+Frg.Request_Group_Name,
+Fcpv.User_Concurrent_Program_Name,
+Fcpv.Description
+FROM fnd_request_groups frg,
+fnd_request_group_units frgu,
+fnd_concurrent_programs_vl fcpv,
+fnd_responsibility_vl frv
+Where Frgu.Request_Unit_Type = 'P'
+AND frgu.request_group_id = frg.request_group_id
+And Frgu.Request_Unit_Id = Fcpv.Concurrent_Program_Id
+And Frv.Request_Group_Id = Frg.Request_Group_Id
+--And Frv.Responsibility_Name Like %XXXX%'
+and Fcpv.User_Concurrent_Program_Name like 'Terex Manufacturer Certificate of Origin'
+Order By Responsibility_Name;
+
+
+// Find last run of any program to get the parameter list

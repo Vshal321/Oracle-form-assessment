@@ -1,0 +1,38 @@
+SELECT DISTINCT
+    hr.name              entity,
+    hca.account_number,
+    ac.customer_name,
+    hp.party_name        ship_to_customer,
+    ship_su.location     ship_to_location,
+    ship_loc.address1    ship_to_address1,
+    ship_loc.address2    ship_to_address2,
+    ship_loc.address3    ship_to_address3,
+    ship_loc.address4    ship_to_address4,
+    rct.trx_number       invoice_number
+FROM
+    ra_customer_trx_all     rct,
+    hz_cust_accounts_all    hca,
+    ar_customers            ac,
+    hz_cust_site_uses_all   ship_su,
+    hz_locations            ship_loc,
+    hz_party_sites          ship_ps,
+    hz_cust_acct_sites_all  ship_cas,
+    oe_order_headers_all    ooh,
+    hr_operating_units      hr,
+    hz_parties              hp
+WHERE
+        1 = 1
+    AND rct.bill_to_customer_id = hca.cust_account_id
+    AND hca.cust_account_id = ac.customer_id
+    AND ooh.ship_to_org_id = ship_su.site_use_id (+)
+    AND ship_loc.location_id (+) = ship_ps.location_id
+    AND ship_su.cust_acct_site_id = ship_cas.cust_acct_site_id (+)
+    AND ship_cas.party_site_id = ship_ps.party_site_id (+)
+    AND ooh.sold_to_org_id = hca.cust_account_id
+    AND ooh.org_id = hr.organization_id
+    AND hp.party_id = hca.party_id
+    AND hr.name LIKE '%Terex%Global%GmbH%'
+    AND hca.account_number = 1989
+    --AND rct.trx_number = '5003933068';
+    AND rct.trx_date BETWEEN '01-JAN-22' AND '01-FEB-22';
+	--AND rownum = 1;

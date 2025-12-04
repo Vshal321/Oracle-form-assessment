@@ -1,0 +1,74 @@
+SELECT DISTINCT
+hp.party_number customernumber,
+hp.party_name customername,
+hcs.cust_account_id CUSTOMERACCOUNTID,
+hca.account_number customeraccountnumber,
+hca.account_name customeraccountname,
+hca.status customeraccountstatus,
+hcs.cust_acct_site_id customeraccountsiteid,
+hps.party_site_number customeracctsitenumber,
+decode(hcs.bill_to_flag, 'P', 'P', 'Y', 'Y',
+hcs.bill_to_flag) custacctbilltoflag,
+decode(hcs.ship_to_flag, 'P', 'P', 'Y', 'Y',
+hcs.ship_to_flag) custacctshiptoflag,
+hcs.status custacctacntsitestatus,
+-- hcs.org_id,
+hou.name operatingunit,
+hl.location_id locationid,
+hl.address1 address1,
+hl.address2 address2,
+hl.address3 address3,
+hl.address3 address4,
+hl.city city,
+hl.state state,
+hl.postal_code postalcode,
+hl.county county,
+hl.province province,
+hl.country country,
+-- hcpt.phone_number phonenumber,
+(SELECT ph.phone_number
+FROM apps.ar_phones_v ph
+WHERE PH.owner_table_name = 'HZ_PARTY_SITES'
+AND PH.owner_table_id = hcs.party_site_id
+AND PH.contact_point_type ='PHONE'
+AND PH.phone_type = 'GEN'
+AND PH.primary_flag = 'Y'
+AND PH.status ='A'
+-- AND rownum = 1
+) phoneNumber,
+hp.person_first_name||''||hp.person_last_name contact_person_name,
+(select email_address from APPS.HZ_CONTACT_POINTS HCP1
+where hcp1.owner_table_name = 'HZ_PARTY_SITES'
+AND hcp1.owner_table_id = hps.party_site_id
+AND HCP1.CONTACT_POINT_TYPE = 'EMAIL'
+AND rownum=1) Email_Address
+-- hus.attribute20 occ_repository_id
+FROM
+apps.hz_locations hl,
+apps.hz_party_sites hps,
+apps.hz_cust_acct_sites_all hcs,
+apps.hz_cust_accounts hca,
+apps.hz_cust_site_uses_all hus,
+apps.hz_parties hp,
+apps.hr_operating_units hou,
+apps.hz_customer_profiles hcp,
+apps.oe_order_headers_all oeha
+WHERE
+hl.location_id = hps.location_id
+AND hps.party_site_id = hcs.party_site_id
+AND hca.cust_account_id = hcs.cust_account_id
+--AND hca.account_name='AFTERMARKET'
+AND hca.party_id = hp.party_id
+AND hp.party_id = hcp.party_id
+AND hca.cust_account_id = hcp.cust_account_id
+AND hcs.cust_acct_site_id = hus.cust_acct_site_id
+AND hp.party_id = hps.party_id
+AND oeha.sold_to_org_id =hca.cust_account_id
+AND hca.status = 'A'
+AND hp.status='A'
+AND hcs.status='A'
+AND hou.organization_id=oeha.org_id
+AND hus.org_id = hou.organization_id
+--AND hca.cust_account_id = '13074302';
+--AND hou.organization_id IN (14474)
+--AND oeha.booked_date BETWEEN '01-JAN-2021' AND sysdate;

@@ -1,0 +1,1027 @@
+SELECT DISTINCT
+    aa.serial,
+    aa.sales_order,
+    aa.customer,
+    aa.item                       "*item",
+    nvl(aa.slot_flag, 'N')        slot_flag,
+    aa.order_date,
+    aa.salesperson_name,
+    (
+        SELECT
+            flow_status_code
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    )                             status,
+    (
+        SELECT
+            org_id
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    ) org_id,
+    (
+        SELECT
+            schedule_ship_date
+        FROM
+            apps.oe_order_lines_all
+        WHERE
+            line_id = aa.line_id
+    )                             schedule_ship_date,
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-UNDERCARRIAGE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'ENTERED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-UNDERCARRIAGE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-ENGINE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'ENTERED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-ENGINE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-LOAD-EQUIP-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'ENTERED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-LOAD-EQUIP-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-CABIN-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'ENTERED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-CABIN-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-PAINT-STYLE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'ENTERED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-PAINT-STYLE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'DOZBLADD-MH'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "DOZBLADD-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "FLTSYSATT-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "MH-SPECIAL-ORDER"
+FROM
+    (
+        SELECT
+            cust_model_serial_number   serial,
+            ooh.header_id,
+            ool.ordered_item,
+            ool.line_id,
+            ool.industry_attribute1    slot_flag,
+            ooh.order_number           sales_order,
+            ooh.ordered_date           order_date,
+            jrd.resource_name          salesperson_name,
+            hp.party_name              customer,
+            (
+                SELECT DISTINCT
+                    ordered_item
+                FROM
+                    apps.oe_order_lines_all
+                WHERE
+                        line_id = ool.line_id
+                    AND ordered_item LIKE '%*%'
+            )                          item
+        FROM
+            apps.oe_order_headers_all     ooh,
+            apps.oe_order_lines_all       ool,
+            apps.hz_parties               hp,
+            apps.hz_cust_accounts         hca,
+            apps.jtf_rs_salesreps         jrs,
+            apps.jtf_rs_defresources_v    jrd
+        WHERE
+                ooh.header_id = ool.header_id
+            AND ooh.flow_status_code IN ( 'ENTERED' )
+            AND ooh.salesrep_id = jrs.salesrep_id
+            AND jrs.resource_id = jrd.resource_id
+            AND ooh.org_id = 29830--36932 -- 432-CN-MF-CHANGZHOU-PH2 -- organization id = 33310
+            AND ooh.org_id = ool.org_id
+--and ooh.header_id=15594206
+            AND ool.sold_to_org_id = hca.cust_account_id
+            AND hp.party_id = hca.party_id
+    ) aa
+WHERE
+    serial IS NOT NULL
+    --AND aa.item IS NOT 
+UNION
+SELECT DISTINCT
+    aa.serial,
+    aa.sales_order,
+    aa.customer,
+    aa.item                       "*item",
+    nvl(aa.slot_flag, 'N')        slot_flag,
+    aa.order_date,
+    aa.salesperson_name,
+    (
+        SELECT
+            flow_status_code
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    )                             status,
+    (
+        SELECT
+            org_id
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    ) org_id,
+    (
+        SELECT
+            schedule_ship_date
+        FROM
+            apps.oe_order_lines_all
+        WHERE
+            line_id = aa.line_id
+    )                             schedule_ship_date,
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-UNDERCARRIAGE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code = 'CLOSED'
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-UNDERCARRIAGE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-ENGINE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code = 'CLOSED'
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-ENGINE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-LOAD-EQUIP-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code = 'CLOSED'
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-LOAD-EQUIP-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-CABIN-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code = 'CLOSED'
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-CABIN-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-PAINT-STYLE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code = 'CLOSED'
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-PAINT-STYLE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'DOZBLADD-MH'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "DOZBLADD-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "FLTSYSATT-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "MH-SPECIAL-ORDER"
+FROM
+    (
+        SELECT
+            cust_model_serial_number   serial,
+            ooh.header_id,
+            ool.ordered_item,
+            ool.line_id,
+            ool.industry_attribute1    slot_flag,
+            ooh.order_number           sales_order,
+            ooh.ordered_date           order_date,
+            jrd.resource_name          salesperson_name,
+            hp.party_name              customer,
+            (
+                SELECT DISTINCT
+                    ordered_item
+                FROM
+                    apps.oe_order_lines_all
+                WHERE
+                        line_id = ool.line_id
+                    AND ordered_item LIKE '%*%'
+            )                          item
+        FROM
+            apps.oe_order_headers_all     ooh,
+            apps.oe_order_lines_all       ool,
+            apps.hz_parties               hp,
+            apps.hz_cust_accounts         hca,
+            apps.jtf_rs_salesreps         jrs,
+            apps.jtf_rs_defresources_v    jrd
+        WHERE
+                ooh.header_id = ool.header_id
+            AND ooh.flow_status_code = 'CLOSED'
+            AND ooh.salesrep_id = jrs.salesrep_id
+            AND jrs.resource_id = jrd.resource_id
+            AND ooh.org_id = 29830--36932 -- 432-CN-MF-CHANGZHOU-PH2 -- organization id = 33310
+            AND ooh.org_id = ool.org_id
+--and ooh.header_id=15594206
+            AND ool.sold_to_org_id = hca.cust_account_id
+            AND hp.party_id = hca.party_id
+    ) aa
+WHERE
+    serial IS NOT NULL
+    AND aa.item IS NOT NULL
+UNION
+SELECT DISTINCT
+    aa.serial,
+    aa.sales_order,
+    aa.customer,
+    aa.item                       "*item",
+    nvl(aa.slot_flag, 'N')        slot_flag,
+    aa.order_date,
+    aa.salesperson_name,
+    (
+        SELECT
+            flow_status_code
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    )                             status,
+    (
+        SELECT
+            org_id
+        FROM
+            apps.oe_order_headers_all
+        WHERE
+            header_id = aa.header_id
+    ) org_id,
+    (
+        SELECT
+            schedule_ship_date
+        FROM
+            apps.oe_order_lines_all
+        WHERE
+            line_id = aa.line_id
+    )                             schedule_ship_date,
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-UNDERCARRIAGE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "OCS-UNDERCARRIAGE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-ENGINE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-ENGINE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT DISTINCT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-LOAD-EQUIP-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-LOAD-EQUIP-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-CABIN-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-CABIN-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT
+                    (
+                        SELECT
+                            ordered_item
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                            link_to_line_id IN (
+                                SELECT
+                                    line_id
+                                FROM
+                                    apps.oe_order_lines_all
+                                WHERE
+                                        ordered_item = 'OCS-PAINT-STYLE-MH-F'
+                                    AND line_id = ool.line_id
+                            )
+                            AND ROWNUM = 1
+                    ) item1
+                FROM
+                    apps.oe_order_headers_all    ooh,
+                    apps.oe_order_lines_all      ool,
+                    apps.hz_parties              hp,
+                    apps.hz_cust_accounts        hca
+                WHERE
+                        ooh.header_id = ool.header_id
+                    AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+                    AND ooh.header_id = aa.header_id
+                    AND ool.sold_to_org_id = hca.cust_account_id
+                    AND hp.party_id = hca.party_id
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+            AND ROWNUM = 1
+    )                             "OCS-PAINT-STYLE-MH-F",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'DOZBLADD-MH'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "DOZBLADD-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "FLTSYSATT-MH",
+    (
+        SELECT DISTINCT
+            a.item1
+        FROM
+            (
+                SELECT DISTINCT
+                    decode((
+                        SELECT
+                            COUNT(*)
+                        FROM
+                            apps.oe_order_lines_all
+                        WHERE
+                                ordered_item = 'MH-SPECIAL-ORDER'
+                            AND header_id = aa.header_id
+                    ),
+                           1,
+                           'Yes',
+                           0,
+                           'No') item1
+                FROM
+                    dual
+            ) a
+        WHERE
+            a.item1 IS NOT NULL
+    )                             "MH-SPECIAL-ORDER"
+FROM
+    (
+        SELECT
+            cust_model_serial_number   serial,
+            ooh.header_id,
+            ool.ordered_item,
+            ool.line_id,
+            ool.industry_attribute1    slot_flag,
+            ooh.order_number           sales_order,
+            ooh.ordered_date           order_date,
+            jrd.resource_name          salesperson_name,
+            hp.party_name              customer,
+            (
+                SELECT DISTINCT
+                    ordered_item
+                FROM
+                    apps.oe_order_lines_all
+                WHERE
+                        line_id = ool.line_id
+                    AND ordered_item LIKE '%*%'
+            )                          item
+        FROM
+            apps.oe_order_headers_all     ooh,
+            apps.oe_order_lines_all       ool,
+            apps.hz_parties               hp,
+            apps.hz_cust_accounts         hca,
+            apps.jtf_rs_salesreps         jrs,
+            apps.jtf_rs_defresources_v    jrd
+        WHERE
+                ooh.header_id = ool.header_id
+            AND ooh.flow_status_code IN ( 'BOOKED', 'CANCELLED' )
+            AND ooh.salesrep_id = jrs.salesrep_id
+            AND jrs.resource_id = jrd.resource_id
+            AND ooh.org_id = 29830--36932 -- 432-CN-MF-CHANGZHOU-PH2 -- organization id = 33310
+            AND ooh.org_id = ool.org_id
+--and ooh.header_id=15594206
+            AND ool.sold_to_org_id = hca.cust_account_id
+            AND hp.party_id = hca.party_id
+    ) aa
+WHERE
+    serial IS NOT NULL
+    AND aa.item IS NOT NULL

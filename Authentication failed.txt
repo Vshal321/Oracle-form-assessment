@@ -1,0 +1,19 @@
+To implement the solution, please execute the following steps:
+
+1. Open Edge browser
+2. 3-dots menu button present at the right-side of the toolbar. Now select Settings option from the main menu.
+3. Click on Downloads tab in left sidebar
+4. In right-side pane, you’ll see Open Office files in the browser
+5. set the Open Office files in the browser toggle option to OFF. or Disable.
+6. Re-login and retest the issue.
+
+
+1. Create Microsoft Edge browser shortcut on the desktop.
+2. Right-click the Edge icon and choose Properties.
+3. Switch to the Shortcuts tab of Edge Properties Window.
+4. In the target field, append the following text to the entry provided -disk-cache-size-<size in bytes>.
+5. Click Apply Button.
+6. Restart the Edge browser.
+7. Retest the issue.
+
+Example : "dfasf.exe" --disk-cache-size=1073741824

@@ -1,0 +1,43 @@
+SELECT DISTINCT
+hou.name ENTITY,
+hp.party_name customer_name,
+hp.party_number customer_number,
+hca.CUSTOMER_TYPE,
+gccrec.concatenated_Segments Rec_account,
+gccrev.concatenated_Segments Rev_account,
+gccfrt.concatenated_Segments freight_account
+FROM
+apps.hz_locations hl,
+apps.hz_party_sites hps,
+apps.hz_cust_acct_sites_all hcs,
+apps.hz_cust_accounts hca,
+apps.hz_cust_site_uses_all hus,
+apps.hz_parties hp,
+apps.hr_operating_units hou,
+apps.hz_customer_profiles hcp,
+apps.oe_order_headers_all oeha,
+apps.gl_code_combinations_kfv gccrec,
+apps.gl_code_combinations_kfv gccrev,
+apps.gl_code_combinations_kfv gccfrt
+WHERE
+hl.location_id = hps.location_id
+AND hps.party_site_id = hcs.party_site_id
+AND hca.cust_account_id = hcs.cust_account_id
+--AND hca.account_name='AFTERMARKET'
+AND hca.party_id = hp.party_id
+AND hp.party_id = hcp.party_id
+AND hca.cust_account_id = hcp.cust_account_id
+AND hcs.cust_acct_site_id = hus.cust_acct_site_id
+AND hp.party_id = hps.party_id
+AND oeha.sold_to_org_id =hca.cust_account_id
+AND hca.status = 'A'
+AND hp.status='A'
+AND hcs.status='A'
+AND hus.status ='A'
+AND hca.CUSTOMER_TYPE = 'I'
+AND hou.organization_id=oeha.org_id
+AND hus.org_id = hou.organization_id
+and hus.gl_id_rec = gccrec.code_combination_id
+and hus.gl_id_rev = gccrev.code_combination_id
+and hus.gl_id_freight = gccfrt.code_combination_id
+--AND hca.account_number = '132789';

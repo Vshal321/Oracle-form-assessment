@@ -1,0 +1,149 @@
+--------------------------Query to get user details-------------------------------------------------------------------------------
+select *
+from apps.fnd_user
+where user_name like '%SUPRIYA.NAINGLAJ%';
+---------------------------Query to get responsibility name-----------------------------------------------------------------------
+Select distinct fcpt.user_concurrent_program_name, --'Concurrent Program Name',
+frg.request_group_name, --'Request Group Name',
+frt.responsibility_name --'Responsibility Name'
+From apps.fnd_Responsibility fr,
+apps.fnd_responsibility_tl frt,
+apps.fnd_request_groups frg,
+apps.fnd_request_group_units frgu,
+apps.fnd_concurrent_programs_tl fcpt
+Where fcpt.user_concurrent_program_name = 'Terex Customer Audit Report' /* your program name goes here */
+and fcpt.concurrent_program_id = frgu.request_unit_id
+and frgu.request_group_id = frg.request_group_id
+and frg.request_group_id = fr.request_group_id
+and fr.responsibility_id = frt.responsibility_id
+Order By 2;
+-----------------------------Query to get package or text details----------------------------------------------------------------
+select * from all_source
+where lower(text) like '%trex_rs_awp_bom_explosions%';
+-----------------------------Code to get screen on-------------------------------------------------------------------------------
+set wsc = CreateObject("WScript.Shell")
+Do
+WScript.Sleep(60*1000)
+wsc.SendKeys("{SCROLLLOCK 2}")
+Loop
+
+copy in notepad, save with .vbs extension, double click to run
+------------------------------Transcation ID for account number------------------------------------------------------------------
+select distinct
+a.party_name,
+b.account_number,
+c.trx_number,
+c.trx_date,
+c.CUSTOMER_TRX_ID,
+c.CREATION_DATE,
+c.LAST_UPDATED_BY
+from 
+hz_parties a,
+hz_cust_accounts b,
+ra_customer_trx_all c
+where 
+a.party_id = b.party_id
+AND b.cust_account_id = c.sold_to_customer_id
+AND b.account_number = '377962';
+--------------------------------Query to check email ID--------------------------------------------------------------------------
+SELECT l.owner_table_id ,
+    l.contact_point_type,
+    email_address,
+    contact_point_purpose_meaning,
+    status,
+    primary_by_purpose
+  FROM apps.ar_phones_v l
+  WHERE l.contact_point_type ='EMAIL'
+  AND status                 = 'A'
+  AND contact_point_purpose_meaning LIKE 'Customer Invoice/Credit/Debit'
+  AND primary_by_purpose = 'Y'
+--------------------------------Query to get secario based query-----------------------------------------------------------------
+SELECT
+    msb.segment1                 item_code,
+    msb.weight_uom_code,
+    msb.unit_weight,
+    msb.description              item_description,
+    mcst.category_set_name,
+    mck.concatenated_segments    category,
+    mcr.cross_reference_type,
+    mcr.cross_reference
+FROM
+    apps.mtl_system_items_b      msb,
+    apps.mtl_categories_kfv      mck,
+    apps.mtl_item_categories     mic,
+    apps.mtl_category_sets_tl    mcst,
+    apps.mtl_cross_references    mcr
+WHERE
+        mic.inventory_item_id = msb.inventory_item_id
+    AND mic.category_id = mck.category_id
+    AND msb.inventory_item_id = mcr.inventory_item_id
+    AND msb.organization_id = mcr.organization_id
+    AND msb.organization_id = mic.organization_id
+    AND mcst.category_set_id = mic.category_set_id
+    --AND mcst.category_set_name = 'Free Freight Exclusion'
+    --AND mcr.cross_reference_type IN ( 'TRX Ecom Oversize Parts', 'AWP Oversized Item' )
+    AND msb.weight_uom_code NOT IN ('LB','KG') --('MM','GL','DEA','NM','GM','MG','QT','EA','MT','BG','L','OZ','TNL','ML','AMT','KM','FT','IN','20D','KW','FT2','PSI','FEA','T')
+    --AND msb.unit_weight > 150;
+    AND ROWNUM = 1;
+UNION
+SELECT
+    msb.segment1                 item_code,
+    msb.weight_uom_code,
+    msb.unit_weight,
+    msb.description              item_description,
+    mcst.category_set_name,
+    mck.concatenated_segments    category,
+    mcr.cross_reference_type,
+    mcr.cross_reference
+FROM
+    apps.mtl_system_items_b      msb,
+    apps.mtl_categories_kfv      mck,
+    apps.mtl_item_categories     mic,
+    apps.mtl_category_sets_tl    mcst,
+    apps.mtl_cross_references    mcr
+WHERE
+        mic.inventory_item_id = msb.inventory_item_id
+    AND mic.category_id = mck.category_id
+    AND msb.inventory_item_id = mcr.inventory_item_id
+    AND msb.organization_id = mcr.organization_id
+      -- and a.attribute20 = 'GNU'
+    AND msb.organization_id = mic.organization_id
+     --and MSB.organization_id = :P_INV_ORGANIZATION
+    AND mcst.category_set_id = mic.category_set_id
+    --AND msb.segment1 = '74747GT'
+    AND mcst.category_set_name = 'Free Freight Exclusion'
+    AND mcr.cross_reference_type IN ( 'TRX Ecom Oversize Parts', 'AWP Oversized Item' )
+    AND msb.weight_uom_code = 'KG'
+    AND msb.unit_weight > 68;
+----------------------------------Query to get Org_id using responsibility----------------------------------------------------
+select * from apps.oe_order_headers_all where ORIG_SYS_DOCUMENT_REF='o12289639';
+/
+SELECT application_id, responsibility_id
+          --INTO l_application_id, l_resp_id
+          FROM fnd_responsibility_vl
+          WHERE responsibility_name ='IE170 AR Customer Master' ;
+/
+select * from fnd_user where user_name = 'SUPRIYA.NAINGLAJ';
+/
+BEGIN
+  fnd_global.APPS_INITIALIZE(280272 --l_user_id
+  ,65796                            --l_resp_id
+  ,222                              --l_resp_appl_id
+  );
+END;
+/
+SELECT fnd_profile.value('PROFILEOPTION')
+,fnd_profile.value('MFG_ORGANIZATION_ID')
+,fnd_profile.value('ORG_ID')
+,fnd_profile.value('LOGIN_ID')
+,fnd_profile.value('USER_ID')
+,fnd_profile.value('USERNAME')
+,fnd_profile.value('CONCURRENT_REQUEST_ID')
+,fnd_profile.value('GL_SET_OF_BKS_ID')
+,fnd_profile.value('SO_ORGANIZATION_ID')
+,fnd_profile.value('APPL_SHRT_NAME')
+,fnd_profile.value('RESP_NAME')
+,fnd_profile.value('RESP_ID')
+FROM DUAL;
+/
+select * from apps.hr_operating_units where ORGANIZATION_ID = 34270;

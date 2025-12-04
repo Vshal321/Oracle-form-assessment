@@ -1,0 +1,5 @@
+INC1019300 - Need a report ran to get other account numbers.
+-------------------------------------------------------------
+Can you please try running program "Customer Listing - Summary" to get the list of data.
+
+If you run program - "Customer Listing - Summary" to get full customer list.

@@ -1,0 +1,109 @@
+SELECT DISTINCT
+aps.vendor_name supplier_name,
+aps.segment1 supplier_account_number,
+aps.vendor_type_lookup_code supplier_type,
+aps.vat_registration_num "TAX REGISTRATION NUMBER",
+aps.num_1099 "Tax_Payer_ID",
+--decode(aps.enabled_flag,'Y','Active','Not Active') Status
+decode(sign(sysdate - nvl(aps.start_date_active, sysdate - 1)), - 1, 'INACTIVE', decode(sign(nvl(aps.end_date_active, sysdate
++ 1) - sysdate), - 1, 'INACTIVE', decode(aps.enabled_flag, 'N', 'INACTIVE', 'ACTIVE'))) status,
+aps.type_1099 "Income Tax Type",
+trunc(aps.creation_date) "Supplier Creation Date",
+(
+SELECT
+user_name
+FROM
+apps.fnd_user
+WHERE
+user_id = aps.created_by
+) "Supplier Created By",
+trunc(aps.last_update_date) "Supplier Last Updated Date",
+(
+SELECT
+user_name
+FROM
+apps.fnd_user
+WHERE
+user_id = aps.last_updated_by
+) "Supplier Last Updated By",
+(
+SELECT
+MAX(aipa.accounting_date)
+FROM
+apps.ap_invoice_payments_all aipa,
+apps.ap_invoices_all aia2
+WHERE
+aia2.vendor_id = aps.vendor_id
+AND aia2.invoice_id = aipa.invoice_id
+) last_payment_date,
+decode(aps.hold_flag, 'Y', 'Yes', 'No') po_hold,
+decode(aps.one_time_flag, 'Y', 'Yes', 'No') one_time,
+decode(aps.state_reportable_flag, 'Y', 'Yes', 'No') state_reportable,
+decode(aps.federal_reportable_flag, 'Y', 'Yes', 'No') "Income Tax Reportable",
+apss.vendor_site_code "Site Name",
+apss.address_line1
+|| ' '
+|| apss.address_line2
+|| ' '
+|| apss.address_line3
+|| ' '
+|| apss.city
+|| ' '
+|| apss.state
+|| ' '
+|| apss.county
+|| ' '
+|| apss.zip
+|| ' '
+|| apss.country "Supplier Address",
+ft.territory_short_name "Supplier Country",
+(
+SELECT
+user_name
+FROM
+apps.fnd_user
+WHERE
+user_id = apss.created_by
+) "Site Created By",
+trunc(apss.last_update_date) "Site Updated Date",
+(
+SELECT
+user_name
+FROM
+apps.fnd_user
+WHERE
+user_id = apss.last_updated_by
+) "Supplier Site Last Updated By",
+decode(sign(nvl(apss.inactive_date, sysdate + 1) - sysdate), - 1, 'Inactive', 'Active') site_status,
+(
+SELECT
+name
+FROM
+apps.ap_terms_tl
+WHERE
+term_id = apss.terms_id
+AND language = 'US'
+) "Payment Terms",
+apss.pay_group_lookup_code "Payment Group",
+apss.payment_priority,
+apss.payment_method_lookup_code payment_method,
+apss.hold_unmatched_invoices_flag hold_unmatched_invoices,
+apss.hold_future_payments_flag,
+apss.hold_all_payments_flag,
+att.tolerance_name invoice_tolerance,
+apss.invoice_currency_code,
+apss.payment_currency_code,
+decode(sign(nvl(pc.inactive_date, sysdate + 1) - sysdate), - 1, 'Inactive', 'Active') Inactive_date
+FROM
+apps.ap_suppliers aps,
+apps.ap_supplier_sites_all apss,
+apps.ap_tolerance_templates att,
+apps.po_vendor_contacts pc,
+apps.fnd_territories_vl ft
+WHERE
+aps.vendor_id = apss.vendor_id
+AND apss.country = ft.territory_code (+)
+AND apss.org_id = 124
+AND apss.tolerance_id = att.tolerance_id (+)
+AND apss.vendor_site_id = pc.vendor_site_id (+)
+AND aps.vendor_id = pc.vendor_id (+)

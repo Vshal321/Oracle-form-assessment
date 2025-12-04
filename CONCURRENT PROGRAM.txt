@@ -1,0 +1,48 @@
+select fcp.user_concurrent_program_name, frv.responsibility_name, fu.user_name requested_by, fcr.request_date,
+fcr.request_id, fcr.parent_request_id, fcr.requested_start_date, fcr.responsibility_id,
+fcr.completion_text, fcr.outfile_name, fcr.argument_text
+from fnd_concurrent_programs_vl fcp,
+fnd_concurrent_requests fcr,
+fnd_responsibility_vl frv,
+fnd_user fu
+where 1=1
+and fcp.concurrent_program_id = fcr.concurrent_program_id
+and frv.responsibility_id = fcr.responsibility_id
+and fcr.requested_by = fu.user_id
+and fcp.user_concurrent_program_name like 'Terex CDI Item Stock Sub Inv Enquiry Program'
+and fcr.argument_text = 'YES'
+order by fcr.request_id;
+
+/
+alter session set current_schema = apps;
+
+------------------------------------------------------------------------------------------------------------------------
+SELECT distinct 
+request_id,
+DECODE(status_code,
+'A','Waiting', 'B','Resuming', 'C','Normal', 'D','Cancelled', 'E','Error', 'F','Scheduled', 'G','Warning', 'H','On Hold',
+'I','Normal', 'M','No Manager', 'Q','Standby', 'R','Normal', 'S','Suspended', 'T','Terminating', 'U','Disabled', 'W','Paused',
+'X','Terminated', 'Z','Waiting') Status,
+DECODE(PHASE_CODE, 'C','Completed', 'I','Inactive', 'P','Pending', 'R','Running', 'Others' ) PHASE,
+TO_CHAR(REQUEST_DATE,'DD-MON-YYYY HH24:MI:SS') REQUEST_DATE,
+REQUESTOR,
+TO_CHAR(ACTUAL_START_DATE,'DD-MON-YYYY HH24:MI:SS') ACTUAL_START_DATE,
+TO_CHAR(ACTUAL_COMPLETION_DATE,'DD-MON-YYYY HH24:MI:SS') ACTUAL_COMPLETION_DATE,
+to_char(round((ACTUAL_COMPLETION_DATE-ACTUAL_START_DATE)*1440,0))||' Mins '||to_char(round(mod((ACTUAL_COMPLETION_DATE-ACTUAL_START_DATE)*86400,60),2))||' Secs' duration,
+ARGUMENT_TEXT,RTL.RESPONSIBILITY_NAME,program,PROGRAM_SHORT_NAME,RTL.RESPONSIBILITY_ID,CONCURRENT_PROGRAM_ID,
+priority_request_id,priority,printer,print_style,user_print_style,requested_start_date
+from apps.FND_CONC_REQ_SUMMARY_V CONC , apps.FND_RESPONSIBILITY_TL RTL
+where CONC.RESPONSIBILITY_ID=RTL.RESPONSIBILITY_ID
+--and status_code = 'E'
+--and language='US'
+and program like '%Terex TMS to LeenTech Interface Program%' --1707035238, 1707035236
+--and request_id=1712313003
+--and REQUESTOR = 'TEREX.OPSAU'
+and ARGUMENT_TEXT ='CURRENCY, , '
+--and REQUEST_DATE > sysdate -5
+order by REQUEST_DATE desc;
+/
+select *
+from apps.TREX_CONCURRENT_REQUESTS_HIST 
+where CONCURRENT_PROGRAM_ID  = 740654--728649
+order by request_date desc;

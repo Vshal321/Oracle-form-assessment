@@ -1,0 +1,45 @@
+SELECT DISTINCT
+    hca.ACCOUNT_NUMBER,
+    hp.party_name Customer_Name,
+    bill_loc.address1 Bill_to_address1,
+    bill_loc.address2 Bill_to_address2,
+    bill_loc.address3 Bill_to_address3,
+    bill_loc.city Bill_to_city,
+    bill_loc.postal_code Bill_to_postal_code,
+    bill_loc.country  Bill_to_Country,
+    ship_loc.address1 Ship_to_address1,
+    ship_loc.address2 Ship_to_address2,
+    ship_loc.address3 Ship_to_address3,
+    ship_loc.city Ship_to_city,
+    ship_loc.postal_code Ship_to_postal_code,
+    ship_loc.country Ship_to_country
+FROM 
+    apps.hz_parties hp,
+    apps.hz_cust_accounts hca,
+    apps.hz_cust_acct_sites_all hcasab,
+    apps.hz_cust_acct_sites_all hcasas,
+    apps.hz_cust_site_uses_all hzsuab,
+    apps.hz_cust_site_uses_all hzsuas,
+    apps.hz_party_sites hps,
+    apps.hz_party_sites hpb,
+    apps.hz_locations bill_loc,
+    apps.hz_locations ship_loc,
+    apps.hr_operating_units hou
+WHERE 1 =1
+AND hp.party_id             = hca.party_id
+AND hcasab.cust_account_id  = hca.cust_account_id
+AND hcasas.cust_account_id  = hca.cust_account_id
+AND hpb.location_id         = bill_loc.location_id
+AND hps.location_id         = ship_loc.location_id
+AND hcasab.party_site_id    = hpb.party_site_id
+AND hcasas.party_site_id    = hps.party_site_id
+AND hcasab.cust_acct_site_id= hzsuab.cust_acct_site_id
+AND hcasas.cust_acct_site_id= hzsuas.cust_acct_site_id
+AND hca.account_name='AFTERMARKET' --'MACHINES'
+--AND hca.status = 'A'
+--AND hp.status='A'
+AND hzsuab.org_id = hou.organization_id
+AND hzsuas.org_id = hou.organization_id
+AND hou.organization_id IN (34270); -- for IE170 responsibility
+/
+alter session set nls_language='AMERICAN';

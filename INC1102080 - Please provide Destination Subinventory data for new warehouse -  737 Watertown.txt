@@ -1,0 +1,5 @@
+select 
+DESCRIPTION as Destination_subinventory,
+SECONDARY_INVENTORY_NAME as Lookup_code
+from 
+MTL_SECONDARY_INVENTORIES_FK_V;

@@ -1,0 +1,21 @@
+INC1162102 - TMS order error tables
+----------------------------------------------------------------------------------------------------------------------------
+SELECT OHIA.ERROR_FLAG,OHIA.ORIG_SYS_DOCUMENT_REF,OHIA.* FROM oe_headers_iface_all OHIA,oe_lines_iface_all OLIA
+WHERE OHIA.ORIG_SYS_DOCUMENT_REF=OLIA.ORIG_SYS_DOCUMENT_REF
+and OHIA.ERROR_FLAG is not null
+and rownum = 1;
+/
+select * from OE_PROCESSING_MSGS_TL;
+/
+select * from OE_PROCESSING_MSGS;
+/
+select error_warning_message, error_warning_detail from REQUEST_HISTORY where rownum = 1; --requestid = <ESS_req_number>;
+/
+select distinct ERROR_FLAG, INTERFACE_STATUS from TREX_ONT_ORDER_HEADER_STG_TBL where ERROR_FLAG != 'S';
+/
+select DISTINCT pmt.MESSAGE_TEXT, pm.TYPE
+from OE_PROCESSING_MSGS_TL pmt,
+OE_PROCESSING_MSGS pm
+where 
+pm.TRANSACTION_ID = pmt.TRANSACTION_ID
+AND pm.TYPE = 'ERROR';

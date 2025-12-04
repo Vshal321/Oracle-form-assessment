@@ -1,0 +1,35 @@
+SELECT DISTINCT
+hp.party_name customer_name,
+hca.account_number customer_account_number,
+hl.location_id location_id,
+hl.address1 address1,
+hl.address2 address2,
+hl.address3 address3,
+hl.address3 address4,
+hl.city city,
+hl.postal_code postalcode,
+hl.country country,
+hl.ADDRESS_LINES_PHONETIC ALTERNATE_ADDRESS_NAME,
+hus.site_use_code,
+hus.location
+FROM
+apps.hz_locations hl,
+apps.hz_party_sites hps,
+apps.hz_cust_acct_sites_all hcs,
+apps.hz_cust_accounts hca,
+apps.hz_cust_site_uses_all hus,
+apps.hz_parties hp,
+apps.hr_operating_units hou,
+apps.hz_customer_profiles hcp
+WHERE
+hl.location_id = hps.location_id
+AND hps.party_site_id = hcs.party_site_id
+AND hca.cust_account_id = hcs.cust_account_id
+AND hca.party_id = hp.party_id
+AND hp.party_id = hcp.party_id
+AND hca.cust_account_id = hcp.cust_account_id
+AND hcs.cust_acct_site_id = hus.cust_acct_site_id
+AND hp.party_id = hps.party_id
+AND hus.org_id = hou.organization_id
+--and hca.account_number = '105770'
+AND hou.organization_id IN (11023);

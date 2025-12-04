@@ -1,0 +1,67 @@
+set define off
+SELECT DISTINCT
+msi.segment1 item,
+mst.description,
+msi.inventory_item_id,
+msi.primary_uom_code,
+mst.language,
+mst.long_description,
+msi.orderable_on_web_flag,
+msi.web_status,
+msi.inventory_item_status_code,
+(
+SELECT
+MAX(msi1.segment1) superseded_item
+FROM
+apps.mtl_related_items mri,
+apps.mfg_lookups ml,
+apps.mtl_system_items_b msi1
+WHERE
+ml.lookup_type (+) = 'MTL_RELATIONSHIP_TYPES'
+AND ml.meaning = 'Superseded'
+AND msi.inventory_item_id = mri.inventory_item_id
+AND msi1.inventory_item_id = mri.related_item_id
+AND mri.relationship_type_id = ml.lookup_code
+) superseded_item,
+msi.last_update_date
+FROM
+apps.mtl_system_items_b msi,
+apps.mtl_system_items_tl mst
+WHERE
+msi.inventory_item_id = mst.inventory_item_id
+AND msi.organization_id = mst.organization_id
+AND trunc(msi.creation_date) between '01-JUL-2023' And SYSDATE
+AND msi.organization_id IN (
+105,
+15225
+)
+AND NOT EXISTS (
+SELECT
+1
+FROM
+apps.mtl_categories_kfv mck,
+apps.mtl_item_categories mic,
+apps.mtl_category_sets_tl mcst
+WHERE
+mic.inventory_item_id = msi.inventory_item_id
+AND mic.category_id = mck.category_id
+AND msi.organization_id = mic.organization_id
+AND mic.organization_id = 15225
+AND mcst.category_set_id = mic.category_set_id
+AND mck.concatenated_segments IN (
+'MATERIALS PROCESSING.CRUSHING & SCREENING.CRUSHERS',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.CRUSHERS - CONE',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.CRUSHERS - IMPACT',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.CRUSHERS - JAW',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.FEEDERS / CONVEYORS',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.MATERIAL PROCESSING SYSTEMS',
+'MATERIALS PROCESSING.CRUSHING & SCREENING.SCREENS',
+'MATERIALS PROCESSING.MATERIALS PROCESSING.COMMON',
+'CONSTRUCTION.LOADER BACKHOE.BACKHOE LOADERS',
+'CONSTRUCTION.LIGHT EQUIPMENT AND ATTACHMENTS.LIGHT EQUIPMENT AND ATTACHMENTS',
+'CONSTRUCTION.TRUCKS - OFF HIGHWAY.ARTICULATED TRUCKS',
+'CONSTRUCTION.COMPACTION.ROLLERS',
+'CONSTRUCTION.COMPACTION.COMPACTORS',
+'CONSTRUCTION.COMPACT LOADERS.SKID STEER LOADERS'
+)
+)

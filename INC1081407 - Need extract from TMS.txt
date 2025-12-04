@@ -1,0 +1,81 @@
+SELECT DISTINCT
+    ac.customer_name,
+    ooh.ORDER_NUMBER,
+    ool.ordered_item,
+    ool.ORDERED_QUANTITY,
+    mb.DESCRIPTION item_description,
+    ooh.ORDERED_DATE,
+    hp.party_name        ship_to_customer,
+    ship_su.location     ship_to_location,
+    ship_cas.ATTRIBUTE12 Company,
+    ship_loc.address1    ship_to_address1,
+    ship_loc.address2    ship_to_address2,
+    ship_loc.address3    ship_to_address3,
+    ship_loc.address4    ship_to_address4,
+    ship_loc.CITY ship_to_city,
+    ship_loc.STATE ship_to_state,
+    ship_loc.POSTAL_CODE ship_to_zipcode,
+    ooh.invoice_to_org_id      bill_to_location,
+    bill_loc.address1          bill_to_address1,
+    bill_loc.address2          bill_to_address2,
+    bill_loc.address3          bill_to_address3,
+    bill_loc.address4          bill_to_address4,
+    bill_loc.CITY bill_to_city,
+    bill_loc.STATE bill_to_state,
+    bill_loc.POSTAL_CODE bill_to_Zipcode,
+    ooh.creation_date,
+    ooh.cust_po_number,
+    ooh.header_id,
+    hca.account_number,
+    mc.segment1 Division,
+    mc.segment2 product_line_type,
+    mc.segment3 product_line,
+    mcst.CATEGORY_SET_NAME
+FROM
+    hz_cust_accounts_all    hca,
+    ar_customers            ac,
+    hz_cust_site_uses_all   ship_su,
+    hz_locations            ship_loc,
+    hz_party_sites          ship_ps,
+    hz_cust_acct_sites_all  ship_cas,
+    hz_locations             bill_loc,
+    hz_party_sites           bill_ps,
+    hz_cust_acct_sites_all   bill_cas,
+    hz_cust_site_uses_all    bill_su,
+    oe_order_headers_all    ooh,
+    hr_operating_units      hr,
+    hz_parties              hp,
+    oe_order_lines_all      ool,
+    mtl_item_categories mic,
+    mtl_categories_b_kfv mc,
+    mtl_system_items_b mb,
+    mtl_category_sets_tl  mcst,
+    mtl_category_sets_b   mcs
+WHERE
+        1 = 1
+    AND hca.cust_account_id = ac.customer_id
+    AND ooh.ship_to_org_id = ship_su.site_use_id (+)
+    AND ship_loc.location_id (+) = ship_ps.location_id
+    AND ship_su.cust_acct_site_id = ship_cas.cust_acct_site_id (+)
+    AND ship_cas.party_site_id = ship_ps.party_site_id (+)
+    AND ooh.sold_to_org_id = hca.cust_account_id
+    AND ooh.org_id = hr.organization_id
+    AND hp.party_id = hca.party_id
+    AND ooh.header_id = ool.header_id
+    AND bill_loc.location_id (+) = bill_ps.location_id
+    AND bill_cas.party_site_id = bill_ps.party_site_id (+)
+    AND ooh.invoice_to_org_id = bill_su.site_use_id (+)
+    AND bill_su.cust_acct_site_id = bill_cas.cust_acct_site_id (+)
+    AND mic.category_id = mc.category_id
+    AND ool.ordered_item = mb.segment1
+    and mb.organization_id=ool.ship_from_org_id
+    and mcst.language='US'
+    and mic.organization_id= mb.organization_id
+    AND mb.INVENTORY_ITEM_ID = mic.INVENTORY_ITEM_ID
+    AND mic.category_set_id = mcs.category_set_id
+    AND mcs.category_set_id = mcst.category_set_id
+    AND mcst.CATEGORY_SET_NAME = 'TEREX Product'
+    AND ooh.ship_from_org_id = 16117
+   -- AND ORDER_NUMBER = 1622224707;
+    AND ooh.creation_date BETWEEN '01-JAN-21' AND SYSDATE;
+    --AND rownum = 1;

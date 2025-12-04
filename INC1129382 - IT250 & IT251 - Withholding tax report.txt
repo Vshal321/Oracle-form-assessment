@@ -1,0 +1,17 @@
+IT250 & IT251 - Withholding tax report:
+------------------------------------------------------------------------
+select 
+hou.name Operating_unit_name,
+aps.segment1 Supplier_number,
+apss.vendor_site_code, 
+apss.allow_awt_flag Allow_Tax_Withholding
+from 
+ap_suppliers aps,
+ap_supplier_sites_all apss,
+hr_operating_units hou
+where 
+aps.vendor_id = apss.vendor_id
+and hou.organization_id = apss.org_id
+and apss.allow_awt_flag='Y'
+and apss.org_id in (13314,15786) -- Terex Italia S.r.l. --TEREX OPERATIONS ITALY S.R.L.
+order by 1,2,3;

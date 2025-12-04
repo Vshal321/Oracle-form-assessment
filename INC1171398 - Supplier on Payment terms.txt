@@ -1,0 +1,38 @@
+INC1171398 - Supplier on Payment terms
+----------------------------------------------------------------------------------------------------------------------
+SELECT
+    hou.name                 entity,
+    aps.vendor_name          supplier_name,
+    aps.segment1             supplier_account_number,
+    apss.address_line1
+|| ' '
+|| apss.address_line2
+|| ' '
+|| apss.address_line3
+|| ' '
+|| apss.city
+|| ' '
+|| apss.state
+|| ' '
+|| apss.county
+|| ' '
+|| apss.zip
+|| ' '
+|| apss.country Supplier_Address,
+trunc(aps.creation_date) Creation_Date,
+    decode(sign(nvl(apss.inactive_date, sysdate + 1) - sysdate), - 1, 'Inactive', 'Active') Active_InActive,
+    
+    apt.name                payment_term
+FROM
+    ap_supplier_sites_all  apss,
+    ap_suppliers           aps,
+    hr_organization_units  hou,
+    ap_terms               apt
+WHERE
+        1 = 1
+    AND apss.vendor_id = aps.vendor_id
+    AND apss.org_id = hou.organization_id
+    AND apt.term_id = apss.terms_id
+    and apss.org_id in (13314,15786,11023)
+    --AND apss.vendor_site_id = 5013927;
+    order by 1,2,3,4;

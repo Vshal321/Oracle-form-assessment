@@ -1,0 +1,57 @@
+SELECT DISTINCT
+     hp.party_name Customer_Name,
+     bill_loc.address1 BILL_TO_ADDRESS1,
+     bill_loc.address2 BILL_TO_ADDRESS,
+     bill_loc.address3 BILL_TO_ADDRESS3,
+     bill_loc.city BILL_TO_CITY,
+     bill_loc.postal_code BILL_TO_POSTAL_CODE,
+     bill_loc.country  BILL_TO_COUNTRY,
+
+     ship_loc.address1 SHIP_TO_ADDRESS1,
+     ship_loc.address2 SHIP_TO_ADDRESS2,
+     ship_loc.address3 SHIP_TO_ADDRESS3,
+     ship_loc.city SHIP_TO_CITY,
+     ship_loc.postal_code SHIP_TO_POSTAL_CODE,
+     ship_loc.country  SHIP_TO_COUNTRY,
+
+     ( SELECT phone_area_code||phone_country_code||phone_number
+                      FROM apps.HZ_CONTACT_POINTS   hcpo
+                     WHERE hcpo.owner_table_id   = hps.party_site_id
+                       AND hcpo.contact_point_type = 'PHONE'
+                       AND status = 'A'
+                       --AND hcpo.created_by = 279697
+                       AND ROWNUM < 2
+                  )  PHONE_NUMBER,
+                  ( SELECT email_address
+                      FROM apps.HZ_CONTACT_POINTS   hcpo
+                     WHERE hcpo.owner_table_id   = hps.party_site_id
+                       AND hcpo.contact_point_type = 'EMAIL'
+                       AND status = 'A'
+                       AND contact_point_purpose = 'TX-CUS-INV' 
+                       AND ROWNUM < 2
+                  )  EMAIL_ADDRESS
+FROM apps.oe_order_headers_all h
+    ,apps.hz_parties hp
+    ,apps.hz_cust_accounts hca
+    ,apps.hz_cust_acct_sites_all hcasab
+    ,apps.hz_cust_acct_sites_all hcasas
+    ,apps.hz_cust_site_uses_all hzsuab
+    ,apps.hz_cust_site_uses_all hzsuas
+    ,apps.hz_party_sites hps
+    ,apps.hz_party_sites hpb
+    ,apps.hz_locations bill_loc
+    ,apps.hz_locations ship_loc
+WHERE 1 =1
+AND hp.party_id             = hca.party_id
+AND hca.CUST_ACCOUNT_ID     = h.sold_to_org_id
+AND hcasab.cust_account_id  = hca.cust_account_id
+AND hcasas.cust_account_id  = hca.cust_account_id
+AND hpb.location_id         = bill_loc.location_id
+AND hps.location_id         = ship_loc.location_id
+AND hcasab.party_site_id    = hpb.party_site_id
+AND hcasas.party_site_id    = hps.party_site_id
+AND hcasab.cust_acct_site_id= hzsuab.cust_acct_site_id
+AND hcasas.cust_acct_site_id= hzsuas.cust_acct_site_id
+AND h.ship_to_org_id        = hzsuas.site_use_id
+AND h.invoice_to_org_id     = hzsuab.site_use_id
+AND hzsuas.org_id = 14474

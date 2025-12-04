@@ -1,0 +1,7 @@
+select aie.*, ai.*
+from ont.oe_order_headers_all aie,
+ont.oe_order_lines_all ai
+where 
+ai.HEADER_ID = aie.HEADER_ID 
+and aie.SHIP_FROM_ORG_ID IN (20035 , 16117 , 21415)
+and aie.ORDERED_DATE IN ('25-MAY-23','26-MAY-23', '31-MAY-23')

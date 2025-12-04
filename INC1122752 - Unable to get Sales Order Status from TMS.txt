@@ -1,0 +1,40 @@
+SELECT
+    party_name               customer,
+    hcaa.account_number      accountnumber,
+    oh.order_number,
+    oh.flow_status_code      orderheaderstatus,
+    oh.freight_terms_code,
+    qph.name                 pricelist,
+    oh.transactional_curr_code,
+    oh.freight_carrier_code,
+    oh.shipping_method_code,
+    ol.line_number,
+    ol.ordered_item,
+    ol.ordered_quantity,
+    ol.order_quantity_uom,
+    ol.unit_selling_price    saleprice,
+    ol.unit_list_price       list_price_amount,
+    rt.name                  payment_term,
+    ol.flow_status_code      linestatus,
+    ol.inventory_item_id,
+    ol.orig_sys_line_ref
+FROM
+    apps.hz_cust_accounts_all    hcaa,
+    apps.hz_parties              hp,
+    apps.oe_order_headers_all    oh,
+    apps.oe_order_lines_all      ol,
+    apps.qp_list_headers         qph,
+    apps.ra_terms_tl             rt
+WHERE
+        hcaa.party_id = hp.party_id
+    AND oh.sold_to_org_id = hcaa.cust_account_id
+    AND oh.header_id = ol.header_id
+    AND oh.price_list_id = qph.list_header_id
+    AND qph.active_flag = 'Y'
+    AND qph.end_date_active IS NULL
+    AND rt.term_id = oh.payment_term_id
+    AND rt.language = 'US'
+AND oh.order_number = #order_number
+ORDER BY
+    oh.order_number,
+    ol.line_number

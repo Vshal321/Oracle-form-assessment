@@ -1,0 +1,126 @@
+Select * from
+(SELECT DISTINCT   TRIM(hp.party_name)             party_name,
+                  hca.orig_system_reference       orig_sys_account,
+                  hca.account_number              tms_account_number,
+                  hp.party_number                 registry_id,
+                  hps.party_site_id               Site_Code,
+                  DECODE(hca.customer_type,'R','EXTERNAL','I','INTERNAL') customer_type,
+                  hcsu.tax_reference              Site_REGISTRATION_NUMBER,
+                  hcsu.tax_code,
+                  TRIM(hca.account_name)          account_name,
+                  hcas.orig_system_reference      Site_ORIG_SYS,
+                  hp.status                       party_status,
+                  hca.status                      Account_status,
+                  hcas.status                     site_status,
+                  hcsu.status                     site_use_status,
+                  TRIM(hl.address1)               address1,
+                  hl.address2,
+                  hl.address3,
+                  hl.address4,
+                  TRIM(hl.city)                   city,
+                  hl.state,
+                  hl.province,
+                  hl.country,
+                  hl.postal_code,
+                  DECODE(TRIM(hcsu.site_use_code),'SHIP_TO','Ship To','BILL_TO','Bill To') Site_use_code,
+                  hcsu.primary_flag,
+                  hou.name,
+                  (SELECT currency_code 
+                  FROM apps.hz_cust_profile_amts      hcpa,
+                       apps.hz_customer_profiles      hcp
+                 WHERE hcpa.cust_account_profile_id  = hcp.cust_account_profile_id
+                   --AND hcp.cust_account_id           = hca.cust_account_id
+                   --AND hcp.site_use_id               = hcsu.site_use_id
+                   AND ROWNUM < 2
+                 ) CURRENCY,
+                 (  SELECT a.NAME
+                      FROM apps.hz_customer_profiles     hcp,
+                           apps.ra_terms                 a 
+                     WHERE a.term_id       = hcp.standard_terms
+                       AND cust_account_id = hca.cust_account_id
+                       AND site_use_id     = hcsu.site_use_id
+                       AND ROWNUM < 2
+                ) PAYMENT_TERMS,
+                hcsu.freight_term FREIGHT_TERMS,
+                  (SELECT name FROM apps.qp_list_headers_all WHERE list_header_id = hcsu.price_list_id AND ROWNUM < 2) PRICELIST,
+                  (  SELECT ac.NAME
+                      FROM apps.hz_customer_profiles     hcp,
+                           ar.ar_collectors         ac
+                     WHERE ac.collector_id = hcp.collector_id
+                       AND cust_account_id = hca.cust_account_id
+                       AND site_use_id     = hcsu.site_use_id
+                       AND ROWNUM < 2
+                ) COLLECTOR_CODE,
+                (SELECT overall_credit_limit 
+                  FROM apps.hz_cust_profile_amts      hcpa,
+                       apps.hz_customer_profiles      hcp
+                 WHERE hcpa.cust_account_profile_id  = hcp.cust_account_profile_id
+                   AND hcp.cust_account_id           = hca.cust_account_id
+                   AND hcp.site_use_id               = hcsu.site_use_id
+                   AND ROWNUM < 2
+                 ) CREDIT_LIMIT,
+                 (SELECT hp.party_name
+                     FROM  apps.hz_cust_account_roles hcar,
+                           apps.hz_parties            hp,
+                           apps.hz_parties            rel_hp,       
+                           apps.hz_relationships      hr
+                     WHERE 1=1
+                       AND hcar.cust_account_id      = hca.cust_account_id
+                       AND hcar.cust_acct_site_id    = hcas.cust_acct_site_id
+                       AND hcar.party_id             = rel_hp.party_id
+                       AND rel_hp.party_id           = hr.party_id
+                       AND hr.object_id              = hp.party_id
+                       AND hr.subject_table_name     = 'HZ_PARTIES'
+                       AND hr.subject_type           = 'ORGANIZATION'
+                       AND hr.relationship_code      = 'CONTACT'
+                       AND ROWNUM < 2
+                   )  CONTACT_NAME,
+                   ( SELECT phone_area_code||phone_country_code||phone_number
+                      FROM apps.HZ_CONTACT_POINTS   hcpo
+                     WHERE hcpo.owner_table_id   = hps.party_site_id
+                       AND hcpo.contact_point_type = 'PHONE'
+                       AND status = 'A'
+                       --AND hcpo.created_by = 279697
+                       AND ROWNUM < 2
+                  )  PHONE_NUMBER,
+                  ( SELECT email_address
+                      FROM apps.HZ_CONTACT_POINTS   hcpo
+                     WHERE hcpo.owner_table_id   = hps.party_site_id
+                       AND hcpo.contact_point_type = 'EMAIL'
+                       AND status = 'A'
+                       AND contact_point_purpose = 'TX-CUS-INV' 
+                       AND ROWNUM < 2
+                  )  EMAIL_ADDRESS
+FROM  apps.hz_parties                hp,
+      apps.hz_party_sites            hps,
+      apps.hz_locations              hl,
+      apps.hz_cust_accounts          hca,
+      apps.hz_cust_acct_sites_all    hcas,
+      apps.hz_cust_site_uses_all     hcsu,
+      apps.hz_organization_profiles  hop,
+      apps.hr_operating_units        hou
+WHERE 1=1
+  AND hp.party_id             = hps.party_id
+  AND hp.party_id			  = hop.party_id
+  AND hps.location_id         = hl.location_id
+  AND hp.party_id             = hca.party_id
+  AND hca.cust_account_id     = hcas.cust_account_id 
+  AND hps.party_site_id       = hcas.party_site_id 
+  AND hcas.cust_acct_site_id  = hcsu.cust_acct_site_id 
+  AND hcsu.org_id             = hou.organization_id 
+  --AND hcsu.site_use_code      = 'BILL_TO'
+  AND hcas.status = 'A'
+  AND hcsu.status = 'A'
+  AND hp.status   = 'A' 
+  AND hca.status  = 'A'
+  AND primary_flag = 'Y'
+  AND hcsu.org_id = 14474
+  --AND hca.account_number = '7895707'
+  --AND rownum = 1
+  --AND hp.party_name = 'CJC PAINTING, INC. DBA RL PAINTING'
+ORDER BY party_name,
+        -- hca.account_name,
+         hca.orig_system_reference,
+         site_use_code)
+         --where currency = 'USD';
+         --AND rownum = 1

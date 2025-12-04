@@ -1,0 +1,62 @@
+INC1143386 - US Masterdata Cleanse
+-----------------------------------------------------------------------------
+Solved by Dominic
+
+select hou.name OU_Name, aps.vendor_id,aps.segment1 vendor_number, 
+aps.vendor_name, aps.ENABLED_FLAG vendor_enabled,
+apss.vendor_site_id,apss.vendor_site_code,apss.INACTIVE_DATE supplier_Site_Inactive_Date,apss.ADDRESS_LINE1,apss.ADDRESS_LINE2,apss.ADDRESS_LINE3,
+apss.CITY,apss.STATE,apss.ZIP,apss.COUNTRY,
+apss.PURCHASING_SITE_FLAG,apss.PAY_SITE_FLAG,
+aps.VAT_REGISTRATION_NUM TAX_IDENTIFICATION_NUMBER,
+(select tax_classification_code 
+from zx_party_tax_profile 
+where country_code = apss.COUNTRY
+and party_type_code = 'THIRD_PARTY_SITE'
+and party_id = aps.party_id) TAX_CLASSIFICATION,
+(select segment1 from po_headers_all 
+where vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id
+and org_id = hou.organization_id
+and creation_date = (select max(creation_date) from po_headers_all 
+where org_id = hou.organization_id
+and vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id)
+and rownum=1) Last_PO_RAISED,
+(select creation_date from po_headers_all 
+where vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id
+and org_id = hou.organization_id
+and creation_date = (select max(creation_date) from po_headers_all 
+where org_id = hou.organization_id
+and vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id)
+and rownum=1) Date_Last_PO_RAISED,
+(select invoice_num from ap_invoices_all 
+where vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id
+and org_id = hou.organization_id
+and payment_status_flag = 'Y'
+and creation_date = (select max(creation_date) from ap_invoices_all 
+where org_id = hou.organization_id
+and vendor_id =aps.vendor_id 
+and payment_status_flag = 'Y'
+and vendor_site_id = apss.vendor_site_id)
+and rownum=1) Last_INVOICE_Payment_RAISED,
+(select creation_date from ap_invoices_all 
+where vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id
+and org_id = hou.organization_id
+and payment_status_flag = 'Y'
+and creation_date = (select max(creation_date) from ap_invoices_all 
+where org_id = hou.organization_id
+and payment_status_flag = 'Y'
+and vendor_id =aps.vendor_id 
+and vendor_site_id = apss.vendor_site_id)
+and rownum=1) Date_Last_INV_Payment_RAISED
+from ap_supplier_sites_all apss,
+     ap_suppliers aps,
+     hr_organization_units hou
+where apss.vendor_id = aps.vendor_id
+and apss.org_id = hou.organization_id
+and apss.org_id in (122,10903,10905,2943)
+order by 1,4,6

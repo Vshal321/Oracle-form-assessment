@@ -1,0 +1,45 @@
+INC1160557 - Cash in advance
+--------------------------------------------------------------------------------------------------
+SELECT DISTINCT
+    hou.name           entity,
+    hp.party_name      customer_name,
+   -- hp.party_number    customer_number,
+    hca.account_number account_number,
+    hca.account_name,
+    rat.name           payment_term,
+    CASE
+        WHEN hcp.credit_hold = 'Y' THEN
+            'Yes'
+        ELSE
+            'No'
+    END                AS "Credit Hold",
+    CASE
+        WHEN hp.status = 'A' THEN
+            'Active'
+        ELSE
+            'InActive'
+    END                AS "Active/inactive"
+FROM
+    ra_terms                rat,
+    hz_parties              hp,
+    hz_cust_site_uses_all   hcsua,
+    hz_cust_acct_sites_all  hcasa,
+    hz_party_sites          hps,
+    hr_operating_units      hou,
+    hz_customer_profiles    hcp,
+    hz_cust_accounts hca
+WHERE
+        1 = 1
+    AND hps.party_site_id = hcasa.party_site_id
+    AND hp.party_id = hps.party_id
+    AND hca.cust_account_id = hcasa.cust_account_id
+    AND hcasa.cust_acct_site_id = hcsua.cust_acct_site_id
+    AND hcsua.payment_term_id = rat.term_id
+    AND hcsua.org_id = hou.organization_id
+    AND hp.party_id = hcp.party_id
+    AND hca.party_id = hp.party_id
+    AND hca.cust_account_id = hcp.cust_account_id
+    AND rat.name = 'CASH IN ADVANCE';
+    --AND SOCIETA' GESTIONE SERVIZI AGRI-LOGISTICI S.R.L.
+    --AND hp.party_number = '466086';
+    --AND hps.PARTY_SITE_NUMBER = '25806644'; --account_type

@@ -1,0 +1,117 @@
+North Bend not getting Lines Released to the Control Board
+----------------------------------------------------------
+Northbend
+
+  SELECT MAX (actual_completion_date),
+         SYSDATE,
+         argument_text,
+         (SELECT name
+            FROM apps.wsh_picking_rules
+           WHERE picking_rule_id = fcr.argument1)
+             rule_name,
+         (SELECT user_name
+            FROM apps.fnd_user
+           WHERE user_id = fcr.requested_by)
+             user_name
+    FROM apps.fnd_concurrent_requests fcr
+   WHERE     concurrent_program_id = 40177 --and actual_completion_date is not null
+         AND argument1 IN (SELECT picking_rule_id
+                             FROM apps.wsh_picking_rules
+                            WHERE name LIKE '%733%')
+         AND status_code <> 'E'
+GROUP BY argument_text,
+         SYSDATE,
+         requested_by,
+         argument1
+ORDER BY 1 DESC
+
+-----------------------------------------------------------------------------------
+
+Southaven
+
+           SELECT MAX (actual_completion_date),
+         SYSDATE,
+         argument_text,
+         (SELECT name
+            FROM apps.wsh_picking_rules
+           WHERE picking_rule_id = fcr.argument1)
+             rule_name,
+         (SELECT user_name
+            FROM apps.fnd_user
+           WHERE user_id = fcr.requested_by)
+             user_name
+    FROM apps.fnd_concurrent_requests fcr
+   WHERE     concurrent_program_id = 40177 --and actual_completion_date is not null
+         AND argument1 IN (SELECT picking_rule_id
+                             FROM apps.wsh_picking_rules
+                            WHERE name LIKE '%728%')
+         AND status_code <> 'E'
+GROUP BY argument_text,
+         SYSDATE,
+         requested_by,
+         argument1
+ORDER BY 1 DESC
+
+1.	Difference between MAX(completion_date) and SYSDATE should not be more than 4 hours
+2.	728 should return below 8 rules and 733 should return below 8 rules
+
+------------------------------------------------------------------------------------
+
+Please add this query as well  for monitoring and let us know if it returns row.
+
+select wdd.source_header_number, wdd.source_line_number, wdd.delivery_detail_id, wdd.released_status, wdd.ship_set_id
+from apps.wsh_delivery_details wdd
+where wdd.released_status in ('R', 'B')
+and wdd.ship_set_id is not null
+and not exists (select 'Y'
+from apps.oe_sets os
+where os.set_id = wdd.ship_set_id
+and os.set_type = 'SHIP_SET');
+
+----------------------------------------------------------------------------------------------------
+Query shared by Mohan
+
+select ral.INTERFACE_LINE_ATTRIBUTE6
+     ,twl.warranty_header_id      
+     ,twl.approved_amount
+     ,part_id
+     , twl.rma_line_id
+     , -(ral.quantity_ordered) quantity_ordered
+     from apps.ra_customer_trx_lines_all ral
+     , apps.ra_customer_trx_all ra
+     , bolinf.terex_warranty_headers_all twh
+     , bolinf.terex_warranty_lines_all twl
+     where ra.customer_trx_id = ral.customer_trx_id
+     and trunc(ra.creation_date) >= trunc(sysdate-50)
+     and twl.warranty_header_id = twh.warranty_header_id
+     and ral.INTERFACE_LINE_ATTRIBUTE1 = to_char(twh.rma_number)
+     --and ra.customer_trx_id = 20145543
+     and ral.inventory_item_id = twl.part_id
+     and twl.rma_line_id is null
+     --and warranty_line_id is null;
+     order by twl.line_number;
+-----------------------------------------------------------------------------------------------------
+--Summary
+
+  SELECT COUNT (*), 'TMS Error  ' || error_message
+    FROM apps.trex_telemetry
+   WHERE error_message IS NOT NULL
+GROUP BY error_message
+UNION
+  SELECT COUNT (*), 'TMS Warning  ' || warning_msg
+    FROM apps.trex_telemetry
+   WHERE warning_msg IS NOT NULL
+GROUP BY warning_msg
+UNION
+  SELECT COUNT (*), 'Boomi error  ' || SUBSTR (BOOMI_ERROR_MESSAGE, 1, 175)
+    FROM apps.trex_telemetry
+   WHERE BOOMI_ERROR_MESSAGE IS NOT NULL
+GROUP BY SUBSTR (BOOMI_ERROR_MESSAGE, 1, 175);
+
+--Details
+
+SELECT *
+  FROM apps.trex_telemetry
+ WHERE    error_message IS NOT NULL
+       OR warning_msg IS NOT NULL
+       OR BOOMI_ERROR_MESSAGE IS NOT NULL;

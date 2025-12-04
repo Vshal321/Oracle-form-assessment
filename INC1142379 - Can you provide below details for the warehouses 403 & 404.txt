@@ -1,0 +1,94 @@
+INC1142379 - Can you provide below details for the warehouses 403 & 404
+-----------------------------------------------------------------------------
+
+select * from HR_LOCATIONS_V;
+/
+select * from hz_locations;
+--EXECUTE apps.mo_global.set_policy_context('S',11023);
+--alter session set nls_language='AMERICAN';
+
+--"country":
+"distance":
+--"city":
+"endDate":
+--"postalCode":
+--"latitude":
+--"county":
+--"stateAddress":
+"pickUp":
+"sites":
+"type":
+"inventory":
+--"locationId":
+--"email": null,
+"longitude":
+--"address3":
+--"address2":
+--"address1":
+"externalLocationId":
+--"phoneNumber":
+"siteGroups":
+--"repositoryId":
+"name":
+"faxNumber":
+"startDate": 
+/
+select * from hz_locations;
+------------------------------------------------------------------------------
+SELECT DISTINCT
+hl.country country,
+hl.city city,
+hl.postal_code postalcode,
+hl.county county,
+hl.state state,
+hl.location_id locationid,
+hp.person_first_name||''||hp.person_last_name contact_person_name,
+(select email_address from APPS.HZ_CONTACT_POINTS HCP1
+where hcp1.owner_table_name = 'HZ_PARTY_SITES'
+AND hcp1.owner_table_id = hps.party_site_id
+AND HCP1.CONTACT_POINT_TYPE = 'EMAIL'
+AND rownum=1) Email_Address,
+hl.address1 address1,
+hl.address2 address2,
+hl.address3 address3,
+(SELECT ph.phone_number
+FROM apps.ar_phones_v ph
+WHERE PH.owner_table_name = 'HZ_PARTY_SITES'
+AND PH.owner_table_id = hcs.party_site_id
+AND PH.contact_point_type ='PHONE'
+AND PH.phone_type = 'GEN'
+AND PH.primary_flag = 'Y'
+AND PH.status ='A'
+-- AND rownum = 1
+) phoneNumber,
+hus.attribute20 occ_repository_id
+FROM
+apps.hz_locations hl,
+apps.hz_party_sites hps,
+apps.hz_cust_acct_sites_all hcs,
+apps.hz_cust_accounts hca,
+apps.hz_cust_site_uses_all hus,
+apps.hz_parties hp,
+apps.hr_operating_units hou,
+apps.hz_customer_profiles hcp
+WHERE
+hl.location_id = hps.location_id
+AND hps.party_site_id = hcs.party_site_id
+AND hca.cust_account_id = hcs.cust_account_id
+--AND hca.account_name='AFTERMARKET'
+AND hca.party_id = hp.party_id
+AND hp.party_id = hcp.party_id
+AND hca.cust_account_id = hcp.cust_account_id
+AND hcs.cust_acct_site_id = hus.cust_acct_site_id
+AND hp.party_id = hps.party_id
+--AND hca.status = 'A'
+--AND hp.status='A'
+--AND hcs.status='A'
+AND hus.org_id = hou.organization_id
+AND hou.organization_id IN (8222)
+AND rownum = 1;
+--AND oeha.booked_date BETWEEN '01-JAN-2021' AND sysdate;
+/
+select * from org_organization_definitions where ORGANIZATION_CODE IN ('403','404');
+/
+alter session set nls_language='AMERICAN';

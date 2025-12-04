@@ -1,0 +1,59 @@
+INC1146482 - Report for all UK Bill to/ Ship to addresses
+
+--------------------------------------------------------------------
+
+SELECT DISTINCT
+    hou.name                 entity,
+    hp.party_name            customer_name,
+    hp.party_number          customer_number,
+    hus.location             site_location_number,
+    hps.party_site_number    site_number,
+    bill_loc.address1        bill_to_address1,
+    bill_loc.address2        bill_to_address2,
+    bill_loc.address3        bill_to_address3,
+    bill_loc.address4        bill_to_address4,
+    bill_loc.city            bill_to_city,
+    bill_loc.state           bill_to_state,
+    bill_loc.postal_code     bill_to_zipcode,
+    bill_loc.location_id     bill_to_location_number,
+    bill_loc.country         bill_loc_country,
+    ship_loc.address1        ship_to_address1,
+    ship_loc.address2        ship_to_address2,
+    ship_loc.address3        ship_to_address3,
+    ship_loc.address4        ship_to_address4,
+    ship_loc.city            ship_to_city,
+    ship_loc.state           ship_to_state,
+    ship_loc.postal_code     ship_to_zipcode,
+    ship_loc.location_id     ship_to_location_number,
+    ship_loc.country         ship_loc_country
+FROM
+    hr_operating_units             hou,
+    hz_parties                     hp,
+    hz_cust_site_uses_all          hus,
+    hz_party_sites                 hps,
+    hz_locations                   bill_loc,
+    hz_locations                   ship_loc,
+    apps.hz_cust_accounts          hca,
+    apps.hz_cust_acct_sites_all    hcs
+WHERE
+        1 = 1
+    AND hca.party_id = hp.party_id
+    AND hcs.cust_acct_site_id = hus.cust_acct_site_id
+    AND hca.cust_account_id = hcs.cust_account_id
+    AND hus.org_id = hou.organization_id
+    AND hp.party_id = hps.party_id
+    AND hps.party_site_id = hcs.party_site_id
+    AND hps.location_id = bill_loc.location_id
+    AND hps.location_id = ship_loc.location_id
+    AND ship_loc.country = 'GB'
+    AND bill_loc.country = 'GB';
+   -- AND hou.ORGANIZATION_ID = '6123'
+   -- AND ROWNUM = 1;
+/
+alter session set nls_language='AMERICAN'; 
+/
+select * from hr_operating_units where ORGANIZATION_ID = '6123';
+/
+select * from org_organization_definitions where OPERATING_UNIT = '6123';
+/
+select * from hz_locations;

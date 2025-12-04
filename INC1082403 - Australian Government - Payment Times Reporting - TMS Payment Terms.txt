@@ -1,0 +1,23 @@
+SELECT DISTINCT
+aia.INVOICE_NUM,
+aia.INVOICE_AMOUNT,
+aia.INVOICE_DATE,
+apt.NAME AP_PAYMENT_TERM,
+apt.DESCRIPTION TERM_DESCRIPTION,
+pha.segment1 PO_NUMBER,
+--pha.creation_date,
+aps.VENDOR_NAME
+FROM 
+po_headers_all pha,
+po_distributions_all pda,
+ap_invoice_distributions_all aid,
+ap_invoices_all aia,
+ap_terms apt,
+ap_suppliers aps
+WHERE pha.po_header_id=pda.po_header_id
+AND aid.po_distribution_id=pda.po_distribution_id
+AND aia.invoice_id=aid.invoice_id
+AND apt.term_id =aia.terms_id
+AND pha.org_id = 14474
+AND trunc(pha.creation_date) between '01-JAN-23' AND '30-JUN-23'
+AND aps.vendor_id = pha.vendor_id

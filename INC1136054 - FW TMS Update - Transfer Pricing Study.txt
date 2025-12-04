@@ -1,0 +1,331 @@
+SELECT DISTINCT         
+      DECODE
+      (
+        (
+          SELECT 'X'
+          FROM   DUAL
+          WHERE   EXISTS
+                (SELECT   'X'
+                                  FROM   applsys.fnd_application_tl
+                                 WHERE   frt.application_id IN
+                                               (101,
+                                                140,
+                                                200,
+                                                205,
+                                                222,
+                                                231,
+                                                260,
+                                                265,
+                                                450,
+                                                673,
+                                                707,
+                                                30001,
+                                                602)
+                                         AND LANGUAGE = 'US'
+                                         AND frt.responsibility_name NOT LIKE
+                                               '%iExpense%')),
+                  'X',
+                  'Finance',
+                  NULL,
+                  DECODE (
+                     (SELECT   'X'
+                        FROM   DUAL
+                       WHERE   EXISTS
+                                  (SELECT   'X'
+                                     FROM   applsys.fnd_application_tl
+                                    WHERE   frt.application_id = 200
+                                            AND LANGUAGE = 'US'
+                                            AND frt.responsibility_name LIKE
+                                                  '%iExpense%')),
+                     'X',
+                     'Expenses',
+                     NULL,
+                     DECODE (
+                        (SELECT   'Y'
+                           FROM   DUAL
+                          WHERE   EXISTS
+                                     (SELECT   'Y'
+                                        FROM   applsys.fnd_application_tl
+                                       WHERE   frt.application_id IN
+                                                     (170,
+                                                      385,
+                                                      512,
+                                                      513,
+                                                      514,
+                                                      515,
+                                                      542,
+                                                      601,
+                                                      661,
+                                                      672,
+                                                      690,
+                                                      872,
+                                                      875)
+                                               AND LANGUAGE = 'US')),
+                        'Y',
+                        'Service + Pricing',
+                        NULL,
+                        DECODE (
+                           (SELECT   'Y'
+                              FROM   DUAL
+                             WHERE   EXISTS
+                                        (SELECT   'Y'
+                                           FROM   applsys.fnd_application_tl
+                                          WHERE   frt.application_id IN (185)
+                                                  AND LANGUAGE = 'US')),
+                           'Y',
+                           'Treasury',
+                           NULL,
+                           DECODE (
+                              (SELECT   'Y'
+                                 FROM   DUAL
+                                WHERE   EXISTS
+                                           (SELECT   'Y'
+                                              FROM   applsys.fnd_application_tl
+                                             WHERE   frt.application_id IN
+                                                           (177,
+                                                            201,
+                                                            202,
+                                                            388,
+                                                            396,
+                                                            401,
+                                                            452,
+                                                            454,
+                                                            704,
+                                                            726)
+                                                     AND LANGUAGE = 'US')),
+                              'Y',
+                              'Supply Chain',
+                              NULL,
+                              DECODE (
+                                 (SELECT   'Y'
+                                    FROM   DUAL
+                                   WHERE   EXISTS
+                                              (SELECT   'Y'
+                                                 FROM   applsys.fnd_application_tl
+                                                WHERE   frt.application_id IN
+                                                              (250,
+                                                               385,
+                                                               405,
+                                                               407,
+                                                               431,
+                                                               700,
+                                                               702,
+                                                               703,
+                                                               706,
+                                                               708,
+                                                               714)
+                                                        AND LANGUAGE = 'US')),
+                                 'Y',
+                                 'Eng and Mfg',
+                                 NULL,
+                                 DECODE (
+                                    (SELECT   'Y'
+                                       FROM   DUAL
+                                      WHERE   EXISTS
+                                                 (SELECT   'Y'
+                                                    FROM   applsys.fnd_application_tl
+                                                   WHERE   frt.application_id IN
+                                                                 (453,
+                                                                  800,
+                                                                  801,
+                                                                  805)
+                                                           AND LANGUAGE = 'US')),
+                                    'Y',
+                                    'Human Resources',
+                                    NULL,
+                                    DECODE (
+                                       (SELECT   'Y'
+                                          FROM   DUAL
+                                         WHERE   EXISTS
+                                                    (SELECT   'Y'
+                                                       FROM   applsys.fnd_application_tl
+                                                      WHERE   frt.application_id IN
+                                                                    (300,
+                                                                     660,
+                                                                     665,
+                                                                     671,
+                                                                     697,
+                                                                     880,
+                                                                     20043)
+                                                              AND LANGUAGE = 'US')),
+                                       'Y',
+                                       'Sales',
+                                       NULL,
+                                       DECODE (
+                                          (SELECT   'Y'
+                                             FROM   DUAL
+                                            WHERE   EXISTS
+                                                       (SELECT   'Y'
+                                                          FROM   applsys.fnd_application_tl
+                                                         WHERE   frt.application_id IN (708)
+                                                                 AND LANGUAGE =
+                                                                       'US')),
+                                          'Y',
+                                          'Configurator',
+                                          NULL,
+                                          DECODE (
+                                             (SELECT   'Y'
+                                                FROM   DUAL
+                                               WHERE   EXISTS
+                                                          (SELECT   'Y'
+                                                             FROM   applsys.fnd_application_tl
+                                                            WHERE   frt.application_id IN
+                                                                          (722, 724)
+                                                                    AND LANGUAGE =
+                                                                          'US')),
+                                             'Y',
+                                             'Planning',
+                                             NULL,
+                                             DECODE (
+                                                (SELECT   'Y'
+                                                   FROM   DUAL
+                                                  WHERE   EXISTS
+                                                             (SELECT   'Y'
+                                                                FROM   applsys.fnd_application_tl
+                                                               WHERE   frt.application_id IN
+                                                                             (0,
+                                                                              1,
+                                                                              50,
+                                                                              99,
+                                                                              160,
+                                                                              174,
+                                                                              175,
+                                                                              190,
+                                                                              200,
+                                                                              203,
+                                                                              242,
+                                                                              451,
+                                                                              603,
+                                                                              20003,
+                                                                              20023,
+                                                                              20063,
+                                                                              20064,
+                                                                              20065)
+                                                                       AND LANGUAGE =
+                                                                             'US')),
+                                                'Y',
+                                                'TMS Operations',
+                                                NULL,
+                                                DECODE (
+                                                   (SELECT   'Y'
+                                                      FROM   DUAL
+                                                     WHERE   EXISTS
+                                                                (SELECT   'Y'
+                                                                   FROM   applsys.fnd_application_tl
+                                                                  WHERE   frt.application_id IN
+                                                                                (178,
+                                                                                 191,
+                                                                                 278)
+                                                                          AND LANGUAGE =
+                                                                                'US')),
+                                                   'Y',
+                                                   'All',
+                                                   NULL,
+                                                   'OTHERS'
+                                                )
+                                             )
+                                          )
+                                       )
+                                    )
+                                 )
+                              )
+                           )
+                        )
+                     )
+                  )
+               ) ""Area of Focus"",
+               fpov.ou_name ""Operating Unit"",
+               --frt.responsibility_name ""Responsibility Name""
+               fu.user_name ""User Name"",
+               fu.description ""User description"",
+               fu.last_logon_date ""Last Logon Date"",
+               fu.start_date ""User Start Date"",
+               fu.end_date ""User End Date"",
+               --(select user_name from fnd_user where user_id = fu.created_by ) Created_by,
+               --(select user_name from fnd_user where user_id = fu.last_updated_by ) Created_by,
+               NVL (
+                  (SELECT   DISTINCT hla.location_code
+                     FROM   applsys.fnd_user fu1,
+                            apps.per_all_people_f papf,
+                            apps.per_person_types ppt,
+                            apps.per_all_assignments_f paaf,
+                            apps.hr_locations_all hla,
+                            apps.hr_all_organization_units haou
+                    WHERE       1 = 1
+                            AND fu1.employee_id = papf.person_id
+                            AND papf.person_type_id = ppt.person_type_id
+                            AND paaf.person_id = papf.person_id
+                            AND paaf.location_id = hla.location_id
+                            AND SYSDATE BETWEEN papf.effective_start_date
+                                            AND  papf.effective_end_date
+                            AND SYSDATE BETWEEN paaf.effective_start_date
+                                            AND  paaf.effective_end_date
+                            AND paaf.organization_id = haou.organization_id
+                            AND fu1.user_id = fu.user_id),
+                  'Unidentified HR Location'
+               ) ""HR LOCATION""
+        FROM   apps.fnd_user fu,
+               apps.fnd_user_resp_groups_direct fugd,
+               apps.fnd_responsibility_tl frt,
+               apps.fnd_responsibility_vl fvl,
+               apps.fnd_application_tl fat,
+               (SELECT   fpov1.level_id,
+                         fpov1.level_value,
+                         fpov1.profile_option_id,
+                         fpov1.profile_option_value,
+                         hrou.name OU_NAME
+                  FROM   apps.fnd_profile_option_values fpov1,
+                         apps.hr_all_organization_units hrou
+                 WHERE       fpov1.level_id = 10003
+                         AND fpov1.profile_option_id = 1991
+                         AND fpov1.profile_option_value = hrou.organization_id)
+               fpov
+       WHERE       fugd.responsibility_id = frt.responsibility_id
+               AND frt.application_id = fat.application_id
+               AND frt.responsibility_id = fvl.responsibility_id
+               AND fat.LANGUAGE = 'US'
+               AND fu.user_id = fugd.user_id
+               AND NVL (fugd.end_date, SYSDATE + 1) > SYSDATE
+               AND NVL (fvl.end_date, SYSDATE + 1) > SYSDATE
+               --AND NVL (fu.end_date, SYSDATE + 1) > SYSDATE
+               AND frt.LANGUAGE = 'US'
+               AND fu.customer_id IS NULL
+               AND fu.supplier_id IS NULL
+               AND fpov.profile_option_id(+) = 1991                     --'ORG_ID'
+               AND fpov.level_id(+) = 10003
+               AND fpov.level_value(+) = frt.responsibility_id
+               AND fu.user_name NOT IN
+                        ('AME_INVALID_APPROVER',
+                         'ANONYMOUS',
+                         'APPSMGR',
+                         'ASGUEST',
+                         'AUTOINSTALL',
+                         'GUEST',
+                         'IBEGUEST',
+                         'IBE_ADMIN',
+                         'IBE_GUEST',
+                         'IEXADMIN',
+                         'INITIAL SETUP',
+                         'WIZARD',
+                         'XML_USER',
+                         'PORTAL30',
+                         'PORTAL30_SSO')
+               AND fu.user_id NOT IN
+                        (SELECT   user_id
+                           FROM   applsys.fnd_user fu2
+                          WHERE   NVL (fu2.end_date, SYSDATE + 1) > SYSDATE
+                                  AND fu2.user_name LIKE '%TEREX%'
+                                  OR fu2.user_name LIKE '%TEST%'
+                                  OR fu2.user_name LIKE '%PLAYBACK%'
+                                  OR fu2.user_name LIKE '%RECORD%'
+                                  OR fu2.user_name LIKE '%DATACONVERSION%')
+               AND frt.responsibility_id NOT IN
+                        (SELECT   responsibility_id
+                           FROM   apps.fnd_responsibility_tl
+                          WHERE      responsibility_name LIKE '%Inquiry%'
+                                  OR responsibility_name LIKE '%Intelligence%'
+                                  OR responsibility_name LIKE '%KPI%'
+                                  OR responsibility_name LIKE '%Setup%'
+                                  OR responsibility_name LIKE '%Manager%'
+                                  OR responsibility_name LIKE '%Super%User%')
+    ORDER BY   4, 5, 6

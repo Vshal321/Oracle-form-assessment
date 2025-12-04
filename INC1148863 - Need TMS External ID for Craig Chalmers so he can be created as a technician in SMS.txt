@@ -1,0 +1,14 @@
+INC1148863 - Notes
+---------------------------------------------------------------------------------------------------------------------------
+
+select * from apps.fnd_user where user_name  --employee_id=203618;
+/
+select * from apps.JTF_RS_RESOURCE_EXTNS where SOURCE_ID=456003;
+
+Name: CRAIG.CHALMERS
+Email: Craig.Chalmers@terex.com
+TMS External Id : 100838093
+TMS Employee Id : 456003
+
+--------------------------------
+based on given example checked the details of craig.

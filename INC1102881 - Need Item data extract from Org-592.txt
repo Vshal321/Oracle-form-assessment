@@ -1,0 +1,117 @@
+select * from (
+--List of items with weight UOM Kgs / Lbs
+SELECT distinct 'KG_LB' Type,msib.organization_id orgid,NVL (msib.unit_weight, 0) actual_weight, 	   
+case when msib.weight_uom_code='KG' then NVL (msib.unit_weight, 1)* 2.204 else  NVL (msib.unit_weight, 1) end unit_weight , 
+			   msib.weight_uom_code                    ,
+			   msib.inventory_item_id                  ,
+			   nvl((	SELECT 'Y' 
+			        FROM apps.mtl_cross_references mcr
+			        WHERE UPPER(mcr.cross_reference_type) IN ('AWP OVERSIZED ITEM', 'TRX ECOM OVERSIZE PARTS')
+			        AND NVL(mcr.cross_reference,'N') = 'Y'
+                    AND msib.inventory_item_id  = mcr.inventory_item_id and rownum=1
+				),'N') oversize_flag,
+                nvl((SELECT segment1
+                      FROM mtl_item_categories  mic,
+                           mtl_categories       mc,
+                           mtl_category_sets    mcs
+                     WHERE     mic.category_id = mc.category_id
+                           AND mic.category_set_id = mcs.category_set_id
+                           AND mic.organization_id =
+                               (SELECT organization_id
+                                  FROM org_organization_definitions
+                                 WHERE organization_name =
+                                       '000-TEREX MASTER ITEM ORGANIZATION')
+                           AND mic.inventory_item_id = msib.inventory_item_id 
+                           AND category_set_name = 'Free Freight Exclusion'),'N') FreeFreightExclusion
+		FROM  mtl_system_items_b msib              
+		WHERE  msib.weight_uom_code in ('KG','LB')
+        and msib.organization_id=11042
+        and NVL (msib.unit_weight, 0) >150
+        
+        union all
+--List of items without a weight UOM:        
+        SELECT Distinct 'WITHOUT_UOM' Type,msib.organization_id orgid,NVL (msib.unit_weight, 0) actual_weight, 	   
+               NVL (msib.unit_weight, 0) unit_weight , 
+			   nvl(msib.weight_uom_code,'NA') weight_uom_code,
+			   msib.inventory_item_id                  ,
+			   nvl((	SELECT 'Y' 
+			        FROM apps.mtl_cross_references mcr
+			        WHERE UPPER(mcr.cross_reference_type) IN ('AWP OVERSIZED ITEM', 'TRX ECOM OVERSIZE PARTS')
+			        AND NVL(mcr.cross_reference,'N') = 'Y'
+                    AND msib.inventory_item_id  = mcr.inventory_item_id and rownum=1
+				),'N') oversize_flag,
+                nvl((SELECT segment1
+                      FROM mtl_item_categories  mic,
+                           mtl_categories       mc,
+                           mtl_category_sets    mcs
+                     WHERE     mic.category_id = mc.category_id
+                           AND mic.category_set_id = mcs.category_set_id
+                           AND mic.organization_id =
+                               (SELECT organization_id
+                                  FROM org_organization_definitions
+                                 WHERE organization_name =
+                                       '000-TEREX MASTER ITEM ORGANIZATION')
+                           AND mic.inventory_item_id = msib.inventory_item_id 
+                           AND category_set_name = 'Free Freight Exclusion'),'N') FreeFreightExclusion
+		FROM  mtl_system_items_b msib              
+		WHERE  msib.weight_uom_code is null
+        and msib.organization_id=11042 
+        and NVL (msib.unit_weight, 0) >68
+        
+ union all
+ 
+--List of items with a weight UOM other than Kgs / Lbs
+----DEA,EA,L,TNL,ML,FT,20D,KW,FT2,FEA
+SELECT Distinct 'OTHER_THAN_KG_LB' Type,msib.organization_id orgid,NVL (msib.unit_weight, 0) actual_weight, 	   
+/* round(decode(msib.unit_weight,
+        'MM',nvl(msib.unit_weight,0)* 0.001 ,
+        'GL',nvl(msib.unit_weight,0)* 3.7854,
+        'NM',nvl(msib.unit_weight,0)* 0.10197162129779283,
+        'GM',nvl(msib.unit_weight,0)* 0.001,
+        'MG',nvl(msib.unit_weight,0)* 0.000001,
+        'MG',nvl(msib.unit_weight,0)* 0.000001,
+        'QT',nvl(msib.unit_weight,0)* 0.946352946,
+        'MT',nvl(msib.unit_weight,0)* 1000,
+        'BG',nvl(msib.unit_weight,0)* 0.023453432147327,
+        'OZ',nvl(msib.unit_weight,0)* 0.0283495,
+        'AMT',nvl(msib.unit_weight,0)* 1000,
+        'KM',nvl(msib.unit_weight,0)* 1000,
+        'IN',nvl(msib.unit_weight,0)* 0.0254,
+        'PSI',nvl(msib.unit_weight,0)* 0.070307,
+        'T',nvl(msib.unit_weight,0)* 1000,
+        0
+        ),2) unit_weight , */
+        nvl(msib.unit_weight,0) unit_weight,
+			   msib.weight_uom_code                    ,
+			   msib.inventory_item_id                  ,
+			   nvl((	SELECT 'Y' 
+			        FROM apps.mtl_cross_references mcr
+			        WHERE UPPER(mcr.cross_reference_type) IN ('AWP OVERSIZED ITEM', 'TRX ECOM OVERSIZE PARTS')
+			        AND NVL(mcr.cross_reference,'N') = 'Y'
+                    AND msib.inventory_item_id  = mcr.inventory_item_id and rownum=1
+				),'N') oversize_flag,
+                nvl((SELECT segment1
+                      FROM mtl_item_categories  mic,
+                           mtl_categories       mc,
+                           mtl_category_sets    mcs
+                     WHERE     mic.category_id = mc.category_id
+                           AND mic.category_set_id = mcs.category_set_id
+                           AND mic.organization_id =
+                               (SELECT organization_id
+                                  FROM org_organization_definitions
+                                 WHERE organization_name =
+                                       '000-TEREX MASTER ITEM ORGANIZATION')
+                           AND mic.inventory_item_id = msib.inventory_item_id 
+                           AND category_set_name = 'Free Freight Exclusion'),'N') FreeFreightExclusion
+		FROM  mtl_system_items_b msib              
+		WHERE  nvl(msib.weight_uom_code,'NA') not in ('KG','LB','NA')
+        and msib.organization_id=11042 
+         )
+        where 
+        /* unit_weight>150
+        and */
+        oversize_flag='N'
+        and FreeFreightExclusion='N'
+        --and orgid=129
+        order by 1,5
+        ;

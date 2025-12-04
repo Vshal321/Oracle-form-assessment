@@ -1,0 +1,82 @@
+INC1197222 - Full Customer Listing - UK120
+
+--------------------------------------------------------------------------------------------------------
+
+SELECT DISTINCT
+    hp.party_name                   customer_name,
+    hp.party_number                 customer_number,
+    hca.account_name                account_type,
+    hcsua.creation_date,
+    (
+        SELECT
+            user_name
+        FROM
+            apps.fnd_user
+        WHERE
+            user_id = hcsua.created_by
+    )                               created_by,
+    (
+        SELECT
+            overall_credit_limit
+        FROM
+            apps.hz_cust_profile_amts    hcpa,
+            apps.hz_customer_profiles    hcp
+        WHERE
+                hcpa.cust_account_profile_id = hcp.cust_account_profile_id
+            AND hcp.cust_account_id = hca.cust_account_id
+            AND hcp.site_use_id = hcsua.site_use_id
+            AND ROWNUM < 2
+    )                               credit_limit,
+    (
+        SELECT
+            a.name
+        FROM
+            apps.hz_customer_profiles    hcp,
+            apps.ra_terms                a
+        WHERE
+                a.term_id = hcp.standard_terms
+            AND hcp.cust_account_id = hca.cust_account_id
+            AND hcp.site_use_id = hcsua.site_use_id
+            AND ROWNUM < 2
+    )                               payment_terms,
+    gccrec.concatenated_segments    rec_account,
+    gccrev.concatenated_segments    rev_account,
+    gccfrt.concatenated_segments    freight_account,
+    hca.account_termination_date    inactive_date,
+    hl.location_id                  locationid,
+    hl.address1                     address1,
+    hl.address2                     address2,
+    hl.address3                     address3,
+    hl.address3                     address4,
+    hl.city                         city,
+    hl.state                        state,
+    hl.postal_code                  postalcode,
+    hl.county                       county,
+    hl.province                     province,
+    hl.country                      country
+FROM
+    apps.hz_parties                  hp,
+    apps.hz_cust_accounts            hca,
+    apps.hz_cust_site_uses_all       hcsua,
+    apps.hz_cust_acct_sites_all      hcasa,
+    apps.gl_code_combinations_kfv    gccrec,
+    apps.gl_code_combinations_kfv    gccrev,
+    apps.gl_code_combinations_kfv    gccfrt,
+    apps.hz_locations                hl,
+    apps.hz_party_sites              hps
+WHERE
+        1 = 1
+    AND hca.party_id = hp.party_id
+    AND hl.location_id = hps.location_id
+    AND hps.party_site_id = hcasa.party_site_id
+    AND hca.cust_account_id = hcasa.cust_account_id
+    AND hcasa.cust_acct_site_id = hcsua.cust_acct_site_id
+    AND hp.status = 'A'
+    AND hca.status = 'A'
+    AND hcasa.status = 'A'
+    AND hcsua.status = 'A'
+    AND hcsua.gl_id_rec = gccrec.code_combination_id
+    AND hcsua.gl_id_rev = gccrev.code_combination_id
+    AND hcsua.gl_id_freight = gccfrt.code_combination_id
+    AND hcsua.org_id = 6123;
+--AND rownum = 1;

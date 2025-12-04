@@ -1,0 +1,58 @@
+SELECT DISTINCT
+    wip_entity_name,
+    oola.line_number
+FROM
+         apps.oe_order_headers_all ooha
+    INNER JOIN apps.oe_order_lines_all oola ON oola.header_id = ooha.header_id
+    LEFT JOIN apps.wip_entities       wip ON wip.organization_id = oola.ship_from_org_id
+                                       AND wip.primary_item_id = oola.inventory_item_id
+WHERE
+    
+    ooha.order_number = 1050317026;
+/
+select * from APPS.wip_reservations_v;
+/
+select * from apps.wip_entities;
+/
+select
+wip.WIP_ENTITY_NAME,
+wipv.DEMAND_SOURCE_LINE_NUMBER line_number
+from 
+apps.wip_reservations_v wipv,
+apps.wip_entities wip,
+apps.oe_order_headers_all ooha,
+apps.oe_order_lines_all oola
+where
+1=1
+AND oola.header_id = ooha.header_id
+AND wipv.WIP_ENTITY_ID = wip.WIP_ENTITY_ID
+AND wip.organization_id = oola.ship_from_org_id
+AND ooha.org_id =oola.org_id
+AND wip.primary_item_id = oola.inventory_item_id
+AND ooha.order_number = 1050317026;
+/
+select * from apps.oe_order_headers_all;
+/
+select * from WIP_REQUIREMENT_OPERATIONS;
+---------------------------------------------------------------------------------------------------
+select
+we.wip_entity_name,
+oola.line_number
+From
+oe_order_headers_all ooha,
+oe_order_lines_all oola,
+mtl_reservations mr,
+wip_discrete_jobs wdj,
+wip_entities we
+Where
+1=1
+AND ooha.header_id = oola.header_id
+AND mr.demand_source_line_id = oola.line_id
+AND mr.supply_source_header_id = we.wip_entity_id
+AND we.wip_entity_id = wdj.wip_entity_id
+AND oola.ship_from_org_id = we.organization_id
+AND we.primary_item_id = oola.inventory_item_id
+AND we.organization_id = wdj.organization_id
+AND ooha.order_number = '1050317026';
+
+To see the historical reservations for non-reservation orders is not possible in reservation tables.

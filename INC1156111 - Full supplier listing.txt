@@ -1,0 +1,124 @@
+INC1156111 - Full supplier listing
+--------------------------------------------------------------------------------------------------------------------
+SELECT DISTINCT
+hou.name                       entity,
+aps.vendor_name supplier_name,
+    aps.segment1          supplier_account_number,
+    
+    aps.enabled_flag      vendor_enabled,
+    apss.vendor_site_id,
+    apss.vendor_site_code,
+    apss.inactive_date    supplier_site_inactive_date,
+    apss.address_line1,
+    apss.address_line2,
+    apss.address_line3,
+    apss.city,
+    apss.state,
+    apss.zip,
+    apss.country,
+    (
+        SELECT
+            segment1
+        FROM
+            po_headers_all
+        WHERE
+                vendor_id = aps.vendor_id
+            AND vendor_site_id = apss.vendor_site_id
+            AND org_id = hou.organization_id
+            AND creation_date = (
+                SELECT
+                    MAX(creation_date)
+                FROM
+                    po_headers_all
+                WHERE
+                        org_id = hou.organization_id
+                    AND vendor_id = aps.vendor_id
+                    AND vendor_site_id = apss.vendor_site_id
+            )
+            AND ROWNUM = 1
+    )                     last_po_raised,
+    (
+        SELECT
+            creation_date
+        FROM
+            po_headers_all
+        WHERE
+                vendor_id = aps.vendor_id
+            AND vendor_site_id = apss.vendor_site_id
+            AND org_id = hou.organization_id
+            AND creation_date = (
+                SELECT
+                    MAX(creation_date)
+                FROM
+                    po_headers_all
+                WHERE
+                        org_id = hou.organization_id
+                    AND vendor_id = aps.vendor_id
+                    AND vendor_site_id = apss.vendor_site_id
+            )
+            AND ROWNUM = 1
+    )                     date_last_po_raised,
+    (
+        SELECT
+            invoice_num
+        FROM
+            ap_invoices_all
+        WHERE
+                vendor_id = aps.vendor_id
+            AND vendor_site_id = apss.vendor_site_id
+            AND org_id = hou.organization_id
+            AND payment_status_flag = 'Y'
+            AND creation_date = (
+                SELECT
+                    MAX(creation_date)
+                FROM
+                    ap_invoices_all
+                WHERE
+                        org_id = hou.organization_id
+                    AND vendor_id = aps.vendor_id
+                    AND payment_status_flag = 'Y'
+                    AND vendor_site_id = apss.vendor_site_id
+            )
+            AND ROWNUM = 1
+    )                     last_invoice_payment_raised,
+    (
+        SELECT
+            creation_date
+        FROM
+            ap_invoices_all
+        WHERE
+                vendor_id = aps.vendor_id
+            AND vendor_site_id = apss.vendor_site_id
+            AND org_id = hou.organization_id
+            AND payment_status_flag = 'Y'
+            AND creation_date = (
+                SELECT
+                    MAX(creation_date)
+                FROM
+                    ap_invoices_all
+                WHERE
+                        org_id = hou.organization_id
+                    AND payment_status_flag = 'Y'
+                    AND vendor_id = aps.vendor_id
+                    AND vendor_site_id = apss.vendor_site_id
+            )
+            AND ROWNUM = 1
+    )                     date_last_inv_payment_raised,
+    trunc(aps.creation_date) Supplier_Creation_Date,
+    apss.purchasing_site_flag purchase_site,
+    apss.pay_site_flag pay_site,
+    apss.attribute10 denied_party_hold
+FROM
+    ap_supplier_sites_all  apss,
+    ap_suppliers           aps,
+    hr_organization_units  hou
+WHERE
+        apss.vendor_id = aps.vendor_id
+    AND apss.org_id = hou.organization_id
+ AND apss.attribute10 = 'Y'
+    --AND aps.segment1 = '56042'
+    --AND apss.org_id IN ( 122, 10903, 10905, 2943 )
+ORDER BY
+    1,
+    4,
+    6

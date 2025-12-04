@@ -1,0 +1,107 @@
+INC1153540 - Supplier Listing for DE923, AT698 & DE210
+
+--------------------------------------------------------------------------------------------------
+
+org id's
+
+DE210 - 124 
+DE923 - 28331
+AT698 - 28332
+
+--------------------------------------------------------------------------------------------------
+
+SELECT DISTINCT aps.vendor_name supplier_name,
+aps.segment1 supplier_number,
+aps.vendor_type_lookup_code supplier_type,
+aps.vat_registration_num "TAX REGISTRATION NUMBER",
+trunc(aps.creation_date) "Supplier Creation Date",
+(
+SELECT
+user_name
+FROM
+apps.fnd_user
+WHERE
+user_id = aps.created_by
+) "Supplier Created By",
+(
+SELECT
+MAX(aipa.accounting_date)
+FROM
+apps.ap_invoice_payments_all aipa,
+apps.ap_invoices_all aia2
+WHERE
+aia2.vendor_id = aps.vendor_id
+AND aia2.invoice_id = aipa.invoice_id
+) last_payment_date,
+apss.vendor_site_code "Site Name",
+apss.address_line1
+|| ' '
+|| apss.address_line2
+|| ' '
+|| apss.address_line3
+|| ' '
+|| apss.city
+|| ' '
+|| apss.state
+|| ' '
+|| apss.county
+|| ' '
+|| apss.zip
+|| ' '
+|| apss.country "Supplier Address",
+ft.territory_short_name "Supplier Country",
+decode(sign(nvl(apss.inactive_date, sysdate + 1) - sysdate), - 1, 'Inactive', 'Active') site_status,
+(
+SELECT
+name
+FROM
+apps.ap_terms_tl
+WHERE
+term_id = apss.terms_id
+AND language = 'US'
+) "Payment Terms",
+decode(sign(nvl(pc.inactive_date, sysdate + 1) - sysdate), - 1, 'Inactive', 'Active') contact_status,
+pc.first_name || pc.last_Name "Contact Name",
+pc.email_address "CONTACT EMAIL"
+FROM
+apps.ap_suppliers aps,
+--apps.hz_parties hpc,
+apps.ap_supplier_sites_all apss,
+apps.ap_tolerance_templates att,
+apps.po_vendor_contacts pc,
+apps.fnd_territories_vl ft,
+(
+SELECT
+bankacct.bank_account_name bank_account_name,
+bankacct.bank_account_number bank_account_number,
+pmtins.order_of_preference primary_flag,
+bankacct.currency_code currency_bank_acc,
+pmtins.start_date start_date,
+pmtins.end_date end_date,
+pvs.vendor_site_id,
+payee.org_id
+FROM
+apps.iby_ext_bank_accounts_v bankacct,
+apps.ap_supplier_sites pvs,
+apps.iby_external_payees_all payee,
+apps.iby_pmt_instr_uses_all pmtins
+WHERE
+1 = 1
+AND bankacct.ext_bank_account_id = pmtins.instrument_id
+-- AND pmtins.payment_flow = 'DISBURSEMENTS'
+AND pmtins.instrument_type = 'BANKACCOUNT'
+AND pmtins.ext_pmt_party_id = payee.ext_payee_id
+AND payee.supplier_site_id = pvs.vendor_site_id
+AND nvl(payee.party_site_id, - 99) = nvl(pvs.party_site_id, - 99)
+AND payee.org_id = pvs.org_id
+AND pvs.org_id = 124
+) bank_det
+WHERE
+aps.vendor_id = apss.vendor_id
+AND apss.vendor_site_id = bank_det.vendor_site_id (+)
+AND apss.country = ft.territory_code (+)
+AND apss.org_id = 124
+AND apss.org_id = bank_det.org_id (+)
+AND apss.tolerance_id = att.tolerance_id (+)
+AND apss.vendor_site_id = pc.vendor_site_id (+)
+AND aps.vendor_id = pc.vendor_id (+);

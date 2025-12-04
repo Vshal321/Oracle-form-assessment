@@ -1,0 +1,13 @@
+SELECT fpov.profile_option_value
+             FROM applsys.fnd_profile_option_values fpov
+                , applsys.fnd_profile_options fpo
+                , applsys.fnd_profile_options_tl fpot
+                , applsys.fnd_responsibility_tl fr
+            WHERE 1 = 1
+              AND fpo.profile_option_name = fpot.profile_option_name
+              AND fpo.profile_option_id = fpov.profile_option_id
+              AND fr.responsibility_id(+) = fpov.level_value
+--              AND fr.responsibility_id = :$PROFILES$.RESP_ID
+              AND fpot.profile_option_name = 'ORG_ID'
+--              and fpov.profile_option_value='11'
+              and fr.responsibility_name like '%CN893 Finance Inquiry%';

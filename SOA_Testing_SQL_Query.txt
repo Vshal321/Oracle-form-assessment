@@ -1,0 +1,92 @@
+SELECT DISTINCT ooh.order_number, ooh.org_id
+FROM apps.oe_order_headers_all ooh,
+  apps.oe_order_lines_all ool,
+  apps.mtl_item_categories_v mic,
+  apps.HR_ORGANIZATION_UNITS_V le,
+  apps.hr_operating_units ou,
+  apps.hz_party_sites ps,
+  apps.hz_cust_acct_sites_all ca,
+  apps.hz_cust_site_uses_all su,
+  apps.hz_locations loc_ship,
+  apps.fnd_territories_tl terr_ship,
+  apps.hz_party_sites ps_bill,
+  apps.hz_cust_acct_sites_all ca_bill,
+  apps.hz_cust_site_uses_all su_bill,
+  apps.hz_locations loc_bill,
+  apps.fnd_territories_tl terr_bill,
+  apps.HR_ALL_ORGANIZATION_UNITS WHAOU,
+  apps.HR_LOCATIONS WHL,
+  apps.fnd_territories_tl ship_from,
+  apps.org_organization_definitions ood
+WHERE 1                                                                           = 1
+and ooh.CREATION_DATE between  '01-JAN-2021' and '01-SEP-2021'
+AND ool.header_id                                                                 = ooh.header_id
+AND ool.line_id                                                                   = NVL (ool.top_model_line_id, ool.line_id)
+AND mic.organization_id                                                           = ool.ship_from_org_id
+AND mic.inventory_item_id                                                         = ool.inventory_item_id
+AND mic.enabled_flag                                                              = 'Y'
+AND mic.category_set_name                                                         = 'TEREX Product'
+AND ou.organization_id                                                            = ooh.org_id
+AND OU.default_legal_context_id                                                   = LE.ORGANIZATION_ID
+AND su.cust_acct_site_id                                                          = ca.cust_acct_site_id
+AND ca.party_site_id                                                              = ps.party_site_id
+AND su.site_use_id                                                                = NVL (ool.ship_to_org_id, ooh.ship_to_org_id)
+AND loc_ship.country                                                              = terr_ship.territory_code(+)
+AND DECODE (loc_ship.country, NULL, USERENV ('LANG'), terr_ship.language)         = USERENV ('LANG')
+AND loc_ship.location_id                                                          = ps.location_id
+AND su_bill.cust_acct_site_id                                                     = ca_bill.cust_acct_site_id
+AND ca_bill.party_site_id                                                         = ps_bill.party_site_id
+AND su_bill.site_use_id                                                           = ooh.invoice_to_org_id
+AND loc_bill.country                                                              = terr_bill.territory_code(+)
+AND DECODE (loc_bill.country, NULL, USERENV ('LANG'), terr_bill.language)         = USERENV ('LANG')
+AND loc_bill.location_id                                                          = ps_bill.location_id
+AND WHAOU.organization_id                                                         = NVL (ool.ship_from_org_id, ooh.ship_from_org_id)
+AND WHL.location_id                                                               = WHAOU.location_id
+AND WHL.country                                                                   = ship_from.territory_code(+)
+AND DECODE (ship_from.territory_code, NULL, USERENV ('LANG'), ship_from.language) = USERENV ('LANG')
+AND 0                                                                             =
+  (SELECT COUNT (1)
+  FROM apps.oe_blanket_lines_v agree
+  WHERE agree.sold_to_org_id     = ooh.sold_to_org_id
+  AND agree.org_id               = ooh.org_id
+  AND agree.item_identifier_type = 'CAT'
+  AND agree.flow_status_code     = 'ACTIVE'
+  AND ordered_item               =
+    (SELECT category_concat_segs
+    FROM apps.mtl_item_categories_v
+    WHERE 1               = 1
+    AND inventory_item_id = ool.inventory_item_id
+    AND organization_id   = ool.ship_from_org_id
+    AND category_set_name = 'TEREX Product'
+    AND enabled_flag      = 'Y'
+    )
+  AND 1 =
+    (SELECT 1
+    FROM apps.fnd_attachment_functions fndattfn,
+      apps.fnd_doc_category_usages fndcatusg,
+      apps.fnd_documents_vl fnddoc,
+      apps.fnd_attached_documents fndattdoc,
+      apps.fnd_documents_short_text st
+    WHERE pk1_value                     = agree.line_id
+    AND fndattfn.attachment_function_id = fndcatusg.attachment_function_id
+    AND fndcatusg.category_id           = fnddoc.category_id
+    AND fnddoc.document_id              = fndattdoc.document_id
+    AND fndattfn.function_name          = 'OEXOEACK'
+    AND fndattdoc.entity_name           = 'OE_ORDER_LINES'
+    AND fnddoc.media_id                 = st.media_id
+    AND st.short_text                  IS NOT NULL
+    )
+  )
+  
+  and apps.TREX_SALES_TNC_PK.TREX_SALES_TERMS_CONDITIONS (        
+              le.country,                                              
+              ship_from.territory_code||'.'||ood.organization_code,    
+              terr_ship.territory_code,                                
+              loc_ship.PROVINCE,                                       
+              terr_bill.territory_code,                                
+              mic.segment1,                                            
+              USERENV ('LANG'),                                        
+              ool.line_id                                              
+           )  = 'TREX_SALES_CR_12_AU'  ------pass template code
+AND NVL (ool.ship_from_org_id, ooh.ship_from_org_id) = ood.ORGANIZATION_ID
+AND ROWNUM=1;

@@ -1,0 +1,7 @@
+INC1275755 - Intermittently parts showing no price in CXC. Reopen of INC1174150 (CHG0067046) 
+---------------------------------------------------------------------------------------------------------
+apps.qp_list_headers_all qph
+              WHERE qph.attribute3
+			  
+select * from all_source where upper(text) like '%%ATTRIBUTE3%' and name like 'TREX%';
+			  

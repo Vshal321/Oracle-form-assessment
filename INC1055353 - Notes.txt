@@ -1,0 +1,3 @@
+INC1055353 - Request to Import orders stuck in Stagging Table in April 2023
+------------------------------------------------------------------------------------------------------
+prepare document and send to TMS operation Team and once done reprocess the order through TMS stagging table.
